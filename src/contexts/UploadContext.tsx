@@ -3,13 +3,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { UploadContext, ActiveUpload } from './UploadContextTypes';
-import { useTranslation } from 'react-i18next';
 import { deleteFromGoogleDrive } from '@/lib/storage';
+import { uploadToInternetArchive, deleteFromInternetArchive } from '@/lib/internetArchive';
 
 const STORAGE_KEY = 'fikreislam_active_uploads';
 
 export const UploadProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { t } = useTranslation();
     const [activeUploads, setActiveUploads] = useState<ActiveUpload[]>(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
@@ -46,8 +45,8 @@ export const UploadProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             delete abortControllers.current[id];
         }
         setActiveUploads(prev => prev.map(u => u.id === id ? { ...u, status: 'cancelled' as const } : u));
-        toast.info(t('dashboard.upload.cancelled', { defaultValue: 'Action cancelled' }));
-    }, [t]);
+        toast.info("Action cancelled");
+    }, []);
 
     const uploadContent = useCallback(async (formData: any, mainFile: File, coverFile: File | null) => {
         if (!user) {
@@ -80,8 +79,26 @@ export const UploadProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             updateUpload(uploadId, { status: 'uploading', progress: 10 });
 
             const fileName = mainFile.name;
+            const storageProvider = formData.storageProvider || (formData.useGoogleDrive ? 'google-drive' : 'supabase');
 
-            if (formData.useGoogleDrive) {
+            if (storageProvider === 'internet-archive') {
+                // Internet Archive Upload Flow
+                if (controller.signal.aborted) throw new Error('Aborted');
+
+                const iaResult = await uploadToInternetArchive(
+                    mainFile,
+                    {
+                        speaker: formData.speaker,
+                        audioType: formData.audioType,
+                        title: formData.title,
+                    },
+                    controller.signal
+                );
+
+                fileUrlPath = iaResult.iaUrl;
+                updateUpload(uploadId, { progress: 50 });
+
+            } else if (storageProvider === 'google-drive' || formData.useGoogleDrive) {
                 // Google Drive Upload Flow
                 const reader = new FileReader();
                 const base64Promise = new Promise<string>((resolve, reject) => {
@@ -124,11 +141,8 @@ export const UploadProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                         if (audioTypeData?.google_folder_id) {
                             googleFolderId = audioTypeData.google_folder_id;
                         } else {
-                            // If we don't have the exact audio type folder ID, 
-                            // we must provide the FULL absolute path from the root so GAS can getOrCreateFolder it.
-                            // Passing speaker's folderId and a relative folderPath doesn't work with the current GAS logic.
                             folderPath = audioType ? `فکر اسلام/${speakerName}/${audioType}` : `فکر اسلام/${speakerName}`;
-                            googleFolderId = null; // Force GAS to use folderPath
+                            googleFolderId = null;
                         }
                     }
                 }
@@ -283,7 +297,7 @@ export const UploadProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             if (dbError) throw dbError;
 
             updateUpload(uploadId, { progress: 100, status: 'completed' });
-            toast.success(t('dashboard.upload.completed', { title: formData.title }));
+            toast.success(`شامل مکمل: ${formData.title}`);
 
         } catch (err: any) {
             if (err.name === 'AbortError' || err.message === 'Aborted') {
@@ -292,11 +306,11 @@ export const UploadProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             }
             console.error('Background upload error:', err);
             updateUpload(uploadId, { status: 'error', error: err.message || 'Unknown error' });
-            toast.error(t('dashboard.upload.failed', { title: formData.title }));
+            toast.error(`شامل کرنے میں ناکامی: ${formData.title}`);
         } finally {
             delete abortControllers.current[uploadId];
         }
-    }, [user, role, updateUpload, t]);
+    }, [user, role, updateUpload]);
 
     const editContent = useCallback(async (
         contentId: string,
@@ -309,7 +323,7 @@ export const UploadProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         contentType: string
     ) => {
         if (!user) {
-            toast.error(t('dashboard.upload.validation.errorNotLoggedIn', { defaultValue: 'User not logged in' }));
+            toast.error("آپ کا داخل ہونا (لاگ ان) ضروری ہے");
             return;
         }
 
@@ -339,9 +353,37 @@ export const UploadProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 updatePayload.file_size = newMainFile.size;
                 updateUpload(uploadId, { status: 'uploading', progress: 10 });
                 const fileName = newMainFile.name;
-                const useGDrive = contentType === 'audio';
 
-                if (useGDrive) {
+                // Determine storage provider: use passed value, or infer from existing URL, or default
+                const storageProvider = updatePayload._storageProvider ||
+                    (currentFileUrl?.startsWith('ia://') ? 'internet-archive' :
+                        currentFileUrl?.startsWith('google-drive://') ? 'google-drive' :
+                            (contentType === 'audio' ? 'internet-archive' : 'supabase'));
+
+                if (storageProvider === 'internet-archive') {
+                    // Internet Archive Upload Flow
+                    if (controller.signal.aborted) throw new Error('Aborted');
+
+                    const iaResult = await uploadToInternetArchive(
+                        newMainFile,
+                        {
+                            speaker: updatePayload.speaker,
+                            audioType: updatePayload.audio_type,
+                            title: updatePayload.title,
+                        },
+                        controller.signal
+                    );
+
+                    fileUrlPath = iaResult.iaUrl;
+
+                    // Delete old file from its original storage
+                    if (currentFileUrl?.startsWith('google-drive://')) {
+                        await deleteFromGoogleDrive(currentFileUrl);
+                    } else if (currentFileUrl?.startsWith('ia://')) {
+                        await deleteFromInternetArchive(currentFileUrl);
+                    }
+
+                } else if (storageProvider === 'google-drive') {
                     const reader = new FileReader();
                     const base64Promise = new Promise<string>((resolve, reject) => {
                         reader.onload = () => resolve((reader.result as string).split(',')[1]);
@@ -397,8 +439,11 @@ export const UploadProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                         throw new Error('Google Drive upload failed');
                     }
 
+                    // Delete old file from its original storage
                     if (currentFileUrl?.startsWith('google-drive://')) {
                         await deleteFromGoogleDrive(currentFileUrl);
+                    } else if (currentFileUrl?.startsWith('ia://')) {
+                        await deleteFromInternetArchive(currentFileUrl);
                     }
                 } else {
                     const filePath = `${contentType}/${fileName}`;
@@ -524,15 +569,18 @@ export const UploadProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             }
             await insertMetadata('language', updatePayload.language);
 
+            // Remove internal fields before saving to database
+            const { _storageProvider, ...dbPayload } = updatePayload;
+
             const { error: dbError } = await supabase
                 .from('content')
-                .update({ ...updatePayload, file_url: fileUrlPath, cover_image_url: coverUrlPath })
+                .update({ ...dbPayload, file_url: fileUrlPath, cover_image_url: coverUrlPath })
                 .eq('id', contentId);
 
             if (dbError) throw dbError;
 
             updateUpload(uploadId, { progress: 100, status: 'completed' });
-            toast.success(t('dashboard.upload.editSuccess'));
+            toast.success("مواد کامیابی سے تبدیل ہو گیا!");
 
         } catch (err: any) {
             if (err.name === 'AbortError' || err.message === 'Aborted') return;
@@ -541,7 +589,7 @@ export const UploadProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         } finally {
             delete abortControllers.current[uploadId];
         }
-    }, [user, updateUpload, t]);
+    }, [user, updateUpload]);
 
 
     const deleteContent = useCallback(async (id: string, title: string, fileUrl: string | null, coverImageUrl: string | null) => {
@@ -564,7 +612,9 @@ export const UploadProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             // Sequential deletion
             if (fileUrl) {
                 updateUpload(uploadId, { progress: 20 });
-                if (fileUrl.startsWith('google-drive://')) {
+                if (fileUrl.startsWith('ia://')) {
+                    await deleteFromInternetArchive(fileUrl);
+                } else if (fileUrl.startsWith('google-drive://')) {
                     await deleteFromGoogleDrive(fileUrl);
                 } else {
                     await supabase.storage.from('content-files').remove([fileUrl]);
@@ -588,13 +638,13 @@ export const UploadProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             if (dbError) throw dbError;
 
             updateUpload(uploadId, { progress: 100, status: 'completed' });
-            toast.success(t('dashboard.myContent.deleteSuccess', { title }));
+            toast.success(`مواد کامیابی سے حذف کر دیا گیا: ${title}`);
 
         } catch (err: any) {
             console.error('Delete error:', err);
             updateUpload(uploadId, { status: 'error', error: err.message || 'Unknown error' });
         }
-    }, [updateUpload, t]);
+    }, [updateUpload]);
 
     const clearCompleted = useCallback(() => {
         setActiveUploads(prev => prev.filter(u => u.status !== 'completed' && u.status !== 'error'));

@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { useTranslation } from 'react-i18next';
 import { Loader2, Plus, Trash2, Pencil, Check, X, Globe } from 'lucide-react';
 
 interface Language {
@@ -15,8 +14,7 @@ interface Language {
 }
 
 export function LanguageManagement() {
-    const { t } = useTranslation();
-    const [languages, setLanguages] = useState<Language[]>([]);
+const [languages, setLanguages] = useState<Language[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [newName, setNewName] = useState('');
@@ -41,7 +39,7 @@ export function LanguageManagement() {
             setLanguages(data || []);
         } catch (error: any) {
             console.error('Error fetching languages:', error);
-            toast.error(t('common.error'));
+            toast.error("ایک غلطی واقع ہوئی ہے");
         } finally {
             setLoading(false);
         }
@@ -55,7 +53,7 @@ export function LanguageManagement() {
         try {
             const exists = languages.some(l => l.name.toLowerCase() === newName.trim().toLowerCase());
             if (exists) {
-                throw new Error(t('dashboard.taxonomyManagement.duplicateError'));
+                throw new Error("یہ نام پہلے سے موجود ہے");
             }
 
             const { error } = await supabase
@@ -64,12 +62,12 @@ export function LanguageManagement() {
 
             if (error) throw error;
 
-            toast.success(t('common.success'));
+            toast.success("کامیاب");
             setNewName('');
             fetchLanguages();
         } catch (error: any) {
             console.error('Add error:', error);
-            toast.error(error.message || t('common.error'));
+            toast.error(error.message || "ایک غلطی واقع ہوئی ہے");
         } finally {
             setActionLoading(null);
         }
@@ -83,7 +81,7 @@ export function LanguageManagement() {
             const itemToEdit = languages.find(l => l.id === id);
             const exists = languages.some(l => l.id !== id && l.name.toLowerCase() === editName.trim().toLowerCase());
             if (exists) {
-                throw new Error(t('dashboard.taxonomyManagement.duplicateError'));
+                throw new Error("یہ نام پہلے سے موجود ہے");
             }
 
             const { error } = await supabase
@@ -103,20 +101,20 @@ export function LanguageManagement() {
                     .eq('language', oldName);
             }
 
-            toast.success(t('common.success'));
+            toast.success("کامیاب");
             setEditingId(null);
             setEditName('');
             fetchLanguages();
         } catch (error: any) {
             console.error('Edit error:', error);
-            toast.error(error.message || t('common.error'));
+            toast.error(error.message || "ایک غلطی واقع ہوئی ہے");
         } finally {
             setActionLoading(null);
         }
     };
 
     const handleDelete = async (id: string, name: string) => {
-        if (!window.confirm(t('dashboard.taxonomyManagement.confirmDelete', { name }))) return;
+        if (!window.confirm(`کیا آپ واقعی "{{name}}" کو حذف کرنا چاہتے ہیں؟`)) return;
 
         setActionLoading(id);
         try {
@@ -127,11 +125,11 @@ export function LanguageManagement() {
 
             if (error) throw error;
 
-            toast.success(t('common.success'));
+            toast.success("کامیاب");
             setLanguages(prev => prev.filter(l => l.id !== id));
         } catch (error: any) {
             console.error('Delete error:', error);
-            toast.error(t('common.error'));
+            toast.error("ایک غلطی واقع ہوئی ہے");
         } finally {
             setActionLoading(null);
         }
@@ -152,23 +150,23 @@ export function LanguageManagement() {
                     <Globe className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                    <CardTitle>{t('dashboard.taxonomyManagement.types.language')}</CardTitle>
-                    <CardDescription>{t('dashboard.taxonomyManagement.descriptions.language')}</CardDescription>
+                    <CardTitle>{"زبان"}</CardTitle>
+                    <CardDescription>{"دستیاب زبانوں کا نظم کریں۔"}</CardDescription>
                 </div>
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleAddLanguage} className="flex gap-4 items-end mb-8">
                     <div className="space-y-2 flex-1">
-                        <Label>{t('dashboard.taxonomyManagement.name')}</Label>
+                        <Label>{"نام"}</Label>
                         <Input
                             value={newName}
                             onChange={(e) => setNewName(e.target.value)}
-                            placeholder={t('dashboard.taxonomyManagement.placeholder', { type: t('dashboard.taxonomyManagement.types.language') })}
+                            placeholder={`نیا ${"زبان"} کا نام درج کریں...`}
                             required
                         />
                     </div>
                     <Button type="submit" disabled={actionLoading === 'add'}>
-                        {actionLoading === 'add' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4 mr-2" /> {t('dashboard.taxonomyManagement.add')}</>}
+                        {actionLoading === 'add' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4 mr-2" /> {"شامل کریں"}</>}
                     </Button>
                 </form>
 
@@ -207,7 +205,7 @@ export function LanguageManagement() {
                     ))}
                     {languages.length === 0 && (
                         <p className="text-center py-8 text-muted-foreground italic">
-                            {t('dashboard.taxonomyManagement.noItems', { type: t('dashboard.taxonomyManagement.types.language') })}
+                            {`کوئی ${"زبان"} نہیں ملا۔`}
                         </p>
                     )}
                 </div>

@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { useTranslation } from 'react-i18next';
 import { Loader2, Plus, Trash2, Pencil, Check, X, Music } from 'lucide-react';
 import { deleteFolderByIdInGoogleDrive, renameFolderByIdInGoogleDrive, createFolderInGoogleDrive } from "@/lib/storage";
 import { MetadataCombobox } from './MetadataCombobox';
@@ -24,8 +23,7 @@ interface Speaker {
 }
 
 export function AudioTypeManagement() {
-    const { t } = useTranslation();
-    const [audioTypes, setAudioTypes] = useState<AudioType[]>([]);
+const [audioTypes, setAudioTypes] = useState<AudioType[]>([]);
     const [speakers, setSpeakers] = useState<Speaker[]>([]);
     const [selectedSpeaker, setSelectedSpeaker] = useState<string>('');
     const [loading, setLoading] = useState(true);
@@ -65,7 +63,7 @@ export function AudioTypeManagement() {
             }
         } catch (error: any) {
             console.error('Error fetching speakers:', error);
-            toast.error(t('common.error'));
+            toast.error("ایک غلطی واقع ہوئی ہے");
             setLoading(false);
         }
     };
@@ -86,7 +84,7 @@ export function AudioTypeManagement() {
             setAudioTypes((data as unknown as AudioType[]) || []);
         } catch (error: any) {
             console.error('Error fetching audio types:', error);
-            toast.error(t('common.error'));
+            toast.error("ایک غلطی واقع ہوئی ہے");
         } finally {
             setLoading(false);
         }
@@ -103,7 +101,7 @@ export function AudioTypeManagement() {
 
             const exists = audioTypes.some(a => a.name.toLowerCase() === newName.trim().toLowerCase());
             if (exists) {
-                throw new Error(t('dashboard.taxonomyManagement.duplicateError'));
+                throw new Error("یہ نام پہلے سے موجود ہے");
             }
 
             // 1. Create subfolder in GDrive for the specific speaker
@@ -126,12 +124,12 @@ export function AudioTypeManagement() {
 
             if (error) throw error;
 
-            toast.success(t('common.success'));
+            toast.success("کامیاب");
             setNewName('');
             fetchAudioTypes(selectedSpeaker);
         } catch (error: any) {
             console.error('Add error:', error);
-            toast.error(error.message || t('common.error'));
+            toast.error(error.message || "ایک غلطی واقع ہوئی ہے");
         } finally {
             setActionLoading(null);
         }
@@ -148,7 +146,7 @@ export function AudioTypeManagement() {
             const itemToEdit = audioTypes.find(a => a.id === id);
             const exists = audioTypes.some(a => a.id !== id && a.name.toLowerCase() === editName.trim().toLowerCase());
             if (exists) {
-                throw new Error(t('dashboard.taxonomyManagement.duplicateError'));
+                throw new Error("یہ نام پہلے سے موجود ہے");
             }
 
             const { error } = await supabase
@@ -180,20 +178,20 @@ export function AudioTypeManagement() {
                 }
             }
 
-            toast.success(t('common.success'));
+            toast.success("کامیاب");
             setEditingId(null);
             setEditName('');
             fetchAudioTypes(selectedSpeaker);
         } catch (error: any) {
             console.error('Edit error:', error);
-            toast.error(error.message || t('common.error'));
+            toast.error(error.message || "ایک غلطی واقع ہوئی ہے");
         } finally {
             setActionLoading(null);
         }
     };
 
     const handleDelete = async (id: string, name: string) => {
-        if (!window.confirm(t('dashboard.taxonomyManagement.confirmDelete', { name }))) return;
+        if (!window.confirm(`کیا آپ واقعی "{{name}}" کو حذف کرنا چاہتے ہیں؟`)) return;
 
         setActionLoading(id);
         try {
@@ -215,11 +213,11 @@ export function AudioTypeManagement() {
                 }
             }
 
-            toast.success(t('common.success'));
+            toast.success("کامیاب");
             setAudioTypes(prev => prev.filter(a => a.id !== id));
         } catch (error: any) {
             console.error('Delete error:', error);
-            toast.error(t('common.error'));
+            toast.error("ایک غلطی واقع ہوئی ہے");
         } finally {
             setActionLoading(null);
         }
@@ -233,19 +231,19 @@ export function AudioTypeManagement() {
                         <Music className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                        <CardTitle>{t('dashboard.taxonomyManagement.types.audio_type')}</CardTitle>
-                        <CardDescription>{t('dashboard.taxonomyManagement.descriptions.audio_type')}</CardDescription>
+                        <CardTitle>{"آڈیو کی قسم"}</CardTitle>
+                        <CardDescription>{"آڈیو کی اقسام (مثلاً بیان، درس وغیرہ) کا نظم کریں۔"}</CardDescription>
                     </div>
                 </div>
 
                 <div className="space-y-2 max-w-md pt-2">
-                    <Label>{t('dashboard.upload.speakerLabel')}</Label>
+                    <Label>{"مقرر / بیان کنندہ"}</Label>
                     <MetadataCombobox
                         options={speakers.map(s => s.name)}
                         value={selectedSpeaker}
                         onChange={setSelectedSpeaker}
                         allowCustom={false}
-                        placeholder={t('common.select')}
+                        placeholder={"منتخب کریں"}
                     />
                 </div>
             </CardHeader>
@@ -256,22 +254,22 @@ export function AudioTypeManagement() {
                     </div>
                 ) : !selectedSpeaker ? (
                     <p className="text-center py-8 text-muted-foreground italic">
-                        {t('common.select')} {t('dashboard.taxonomyManagement.types.speaker')}
+                        {"منتخب کریں"} {"مقرر"}
                     </p>
                 ) : (
                     <>
                         <form onSubmit={handleAddAudioType} className="flex gap-4 items-end mb-8">
                             <div className="space-y-2 flex-1">
-                                <Label>{t('dashboard.taxonomyManagement.name')}</Label>
+                                <Label>{"نام"}</Label>
                                 <Input
                                     value={newName}
                                     onChange={(e) => setNewName(e.target.value)}
-                                    placeholder={t('dashboard.taxonomyManagement.placeholder', { type: t('dashboard.taxonomyManagement.types.audio_type') })}
+                                    placeholder={`نیا ${"آڈیو کی قسم"} کا نام درج کریں...`}
                                     required
                                 />
                             </div>
                             <Button type="submit" disabled={actionLoading === 'add' || !selectedSpeaker}>
-                                {actionLoading === 'add' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4 mr-2" /> {t('dashboard.taxonomyManagement.add')}</>}
+                                {actionLoading === 'add' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4 mr-2" /> {"شامل کریں"}</>}
                             </Button>
                         </form>
 
@@ -320,7 +318,7 @@ export function AudioTypeManagement() {
                             ))}
                             {audioTypes.length === 0 && (
                                 <p className="text-center py-8 text-muted-foreground italic">
-                                    {t('dashboard.taxonomyManagement.noItems', { type: t('dashboard.taxonomyManagement.types.audio_type') })}
+                                    {`کوئی ${"آڈیو کی قسم"} نہیں ملا۔`}
                                 </p>
                             )}
                         </div>

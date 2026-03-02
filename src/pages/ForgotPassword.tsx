@@ -9,22 +9,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowLeft, Mail, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "@/assets/logo.png";
-import { useTranslation } from "react-i18next";
-
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isEmailSent, setIsEmailSent] = useState(false);
   const { toast } = useToast();
-  const { t } = useTranslation();
-
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email) {
       toast({
-        title: t("auth.missingFields"),
-        description: t("auth.fillAllFields"),
+        title: "خالی خانے",
+        description: "براہ کرم تمام خانے پُر کریں",
         variant: "destructive",
       });
       return;
@@ -38,7 +34,7 @@ const ForgotPassword = () => {
 
     if (error) {
       toast({
-        title: t("qa.form.errorTitle"),
+        title: "غلطی",
         description: error.message,
         variant: "destructive",
       });
@@ -83,7 +79,7 @@ const ForgotPassword = () => {
               >
                 <img
                   src={logo}
-                  alt={t("common.brand")}
+                  alt={"فکر اسلام"}
                   className="w-32 h-32 md:w-40 md:h-40 object-contain mx-auto drop-shadow-2xl opacity-90"
                 />
               </motion.div>
@@ -93,7 +89,7 @@ const ForgotPassword = () => {
                 transition={{ delay: 0.3 }}
                 className="font-display text-4xl font-bold text-foreground mb-4 tracking-tight"
               >
-                {t("auth.forgotPassword")}
+                {"پاس ورڈ بھول گئے؟"}
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
@@ -102,8 +98,8 @@ const ForgotPassword = () => {
                 className="text-muted-foreground text-lg opacity-80"
               >
                 {isEmailSent
-                  ? t("auth.checkEmail")
-                  : t("auth.enterEmailForReset")
+                  ? "ای میل چیک کریں"
+                  : "اپنا ای میل درج کریں اور ہم آپ کو پاس ورڈ تبدیل کرنے کا لنک بھیجیں گے"
                 }
               </motion.p>
             </div>
@@ -125,14 +121,14 @@ const ForgotPassword = () => {
                     <Mail className="w-12 h-12 text-primary" />
                   </motion.div>
                   <p className="text-lg text-muted-foreground px-4 leading-relaxed">
-                    {t("forgotPassword.emailSentMessage", { email })}
+                    {`ہم نے پاس ورڈ تبدیل کرنے کا لنک {{email}} پر بھیج دیا ہے۔ براہ کرم اپنا ای میل چیک کریں اور ہدایات پر عمل کریں۔`}
                   </p>
                   <Button
                     variant="outline"
                     className="w-full h-14 rounded-2xl border-primary/20 hover:bg-primary/5 hover:text-primary transition-all text-lg font-bold"
                     onClick={() => setIsEmailSent(false)}
                   >
-                    {t("forgotPassword.tryDifferentEmail")}
+                    {"دوسرا ای میل آزمائیں"}
                   </Button>
                 </motion.div>
               ) : (
@@ -145,7 +141,7 @@ const ForgotPassword = () => {
                   className="space-y-8"
                 >
                   <div className="space-y-3">
-                    <Label htmlFor="email" className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">{t("auth.email")}</Label>
+                    <Label htmlFor="email" className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">{"ای میل"}</Label>
                     <div className="relative group">
                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                       <Input
@@ -168,11 +164,11 @@ const ForgotPassword = () => {
                     {isLoading ? (
                       <div className="flex items-center gap-3">
                         <Loader2 className="h-6 w-6 animate-spin" />
-                        <span>{t("forgotPassword.sending")}</span>
+                        <span>{"بھیجا جا رہا ہے..."}</span>
                       </div>
                     ) : (
                       <div className="flex items-center justify-center gap-3">
-                        <span>{t("forgotPassword.sendResetLink")}</span>
+                        <span>{"پاس ورڈ تبدیلی کا لنک بھیجیں"}</span>
                         <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform rotate-180" />
                       </div>
                     )}
@@ -192,7 +188,7 @@ const ForgotPassword = () => {
                 className="group flex items-center justify-center gap-3 text-lg text-muted-foreground hover:text-primary transition-all font-bold"
               >
                 <ArrowLeft className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                {t("forgotPassword.backToSignIn")}
+                {"واپس داخل ہونے کے صفحے پر"}
               </Link>
             </motion.div>
           </div>

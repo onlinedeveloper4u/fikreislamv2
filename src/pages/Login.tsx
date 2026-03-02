@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ArrowRight, Mail, Lock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,8 +15,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { signIn } = useAuth();
-  const { t } = useTranslation();
-  const navigate = useNavigate();
+const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,8 +23,8 @@ const Login = () => {
 
     if (!email || !password) {
       toast({
-        title: t("auth.missingFields"),
-        description: t("auth.fillAllFields"),
+        title: "خالی خانے",
+        description: "براہ کرم تمام خانے پُر کریں",
         variant: "destructive",
       });
       return;
@@ -39,13 +37,13 @@ const Login = () => {
     if (error) {
       let description = error.message;
       if (error.message === "Invalid login credentials") {
-        description = t("auth.invalidCredentials");
+        description = "غلط ای میل یا پاس ورڈ";
       } else if (error.message.includes("Email not confirmed")) {
-        description = t("auth.emailNotConfirmed");
+        description = "ای میل کی تصدیق ابھی تک نہیں ہوئی ہے";
       }
 
       toast({
-        title: t("auth.loginFailed"),
+        title: "ناکامی",
         description,
         variant: "destructive",
       });
@@ -54,8 +52,8 @@ const Login = () => {
     }
 
     toast({
-      title: t("auth.welcomeBackToast"),
-      description: t("auth.signedInSuccess"),
+      title: "خوش آمدید!",
+      description: "کامیابی سے داخل ہو گئے",
     });
 
     navigate("/");
@@ -119,7 +117,7 @@ const Login = () => {
                 transition={{ delay: 0.4 }}
                 className="font-display text-4xl font-bold text-foreground mb-4 tracking-tight"
               >
-                {t("auth.welcomeBack")}
+                {"خوش آمدید"}
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
@@ -127,7 +125,7 @@ const Login = () => {
                 transition={{ delay: 0.5 }}
                 className="text-muted-foreground text-lg opacity-80"
               >
-                {t("auth.signInToContinue")}
+                {"جاری رکھنے کے لیے داخل ہوں"}
               </motion.p>
             </div>
 
@@ -138,7 +136,7 @@ const Login = () => {
                 transition={{ delay: 0.6 }}
                 className="space-y-3"
               >
-                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">{t("auth.email")}</Label>
+                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">{"ای میل"}</Label>
                 <div className="relative group">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   <Input
@@ -160,14 +158,14 @@ const Login = () => {
                 className="space-y-3"
               >
                 <div className="flex items-center justify-between px-1">
-                  <Label htmlFor="password" title={t("auth.password")} className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">
-                    {t("auth.password")}
+                  <Label htmlFor="password" title={"پاس ورڈ"} className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">
+                    {"پاس ورڈ"}
                   </Label>
                   <Link
                     to="/forgot-password"
                     className="text-xs font-bold text-primary/70 hover:text-primary transition-colors uppercase tracking-widest"
                   >
-                    {t("auth.forgotPassword")}
+                    {"پاس ورڈ بھول گئے؟"}
                   </Link>
                 </div>
                 <div className="relative group">
@@ -198,11 +196,11 @@ const Login = () => {
                   {isLoading ? (
                     <div className="flex items-center gap-3">
                       <Loader2 className="h-6 w-6 animate-spin" />
-                      <span>{t("auth.signingIn")}</span>
+                      <span>{"داخل ہو رہے ہیں..."}</span>
                     </div>
                   ) : (
                     <div className="flex items-center justify-center gap-3">
-                      <span>{t("auth.signIn")}</span>
+                      <span>{"داخل ہوں"}</span>
                       <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
                     </div>
                   )}
@@ -217,9 +215,9 @@ const Login = () => {
               className="text-center mt-12 pt-8 border-t border-border/20"
             >
               <p className="text-muted-foreground text-lg">
-                {t("auth.noAccount")}{" "}
+                {"اکاؤنٹ نہیں ہے؟"}{" "}
                 <Link to="/register" className="text-primary hover:text-primary/80 font-bold transition-colors">
-                  {t("auth.createOne")}
+                  {"ابھی بنائیں"}
                 </Link>
               </p>
             </motion.div>

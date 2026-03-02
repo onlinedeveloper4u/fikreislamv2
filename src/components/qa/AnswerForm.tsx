@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Send } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 
 interface AnswerFormProps {
   questionId: string;
@@ -15,7 +14,6 @@ interface AnswerFormProps {
 export function AnswerForm({ questionId, onAnswerAdded }: AnswerFormProps) {
   const { user, role } = useAuth();
   const { toast } = useToast();
-  const { t } = useTranslation();
   const [answer, setAnswer] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,18 +37,18 @@ export function AnswerForm({ questionId, onAnswerAdded }: AnswerFormProps) {
       if (error) throw error;
 
       toast({
-        title: isAdmin ? t('qa.answerForm.answerPosted') : t('qa.answerForm.answerSubmitted'),
+        title: isAdmin ? "جواب شائع ہو گیا" : "جواب جمع کر دیا گیا",
         description: isAdmin
-          ? t('qa.form.successDesc')
-          : t('qa.answerForm.answerSubmittedDesc'),
+          ? "آپ کا جواب جمع کر دیا گیا ہے!"
+          : "آپ کا جواب جائزے کے لیے جمع کر دیا گیا ہے",
       });
       setAnswer('');
       onAnswerAdded();
     } catch (error) {
       console.error('Error submitting answer:', error);
       toast({
-        title: t('qa.form.errorTitle'),
-        description: t('qa.form.errorDesc'),
+        title: "غلطی",
+        description: "جواب جمع کرانے میں ناکامی",
         variant: 'destructive',
       });
     } finally {
@@ -63,14 +61,14 @@ export function AnswerForm({ questionId, onAnswerAdded }: AnswerFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-2 mt-3">
       <Textarea
-        placeholder={t('qa.answerForm.placeholder')}
+        placeholder="اپنا جواب یہاں فراہم کریں..."
         value={answer}
         onChange={(e) => setAnswer(e.target.value)}
         className="min-h-[60px] text-sm"
       />
       <Button type="submit" size="sm" disabled={isSubmitting || !answer.trim()}>
         <Send className="h-3 w-3 mr-1" />
-        {isSubmitting ? t('qa.form.submitting') : t('qa.answerForm.postAnswer')}
+        {isSubmitting ? "جمع ہو رہا ہے..." : "جواب جمع کرائیں"}
       </Button>
     </form>
   );

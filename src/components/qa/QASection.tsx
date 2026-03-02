@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { QuestionForm } from './QuestionForm';
 import { QuestionList } from './QuestionList';
 import { HelpCircle } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 
 interface QASectionProps {
   title?: string;
@@ -11,7 +10,6 @@ interface QASectionProps {
 
 export function QASection({ title }: QASectionProps) {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const { t } = useTranslation();
 
   const handleQuestionAdded = () => {
     setRefreshTrigger(prev => prev + 1);
@@ -22,7 +20,7 @@ export function QASection({ title }: QASectionProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
           <HelpCircle className="h-5 w-5 text-primary" />
-          {title || t('qa.sectionTitle')}
+          {title || "سوال و جواب"}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">

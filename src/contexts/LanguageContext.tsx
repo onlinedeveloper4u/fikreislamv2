@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
 
 type Direction = 'rtl';
 
@@ -13,39 +12,26 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-    const { i18n } = useTranslation();
-
     // Keep direction, HTML attributes, and Metadata in sync
     useEffect(() => {
         document.documentElement.dir = 'rtl';
         document.documentElement.lang = 'ur';
-        localStorage.setItem('i18nextLng', 'ur');
 
         // Update Metadata (Tab Title and Description)
-        const metaTitle = i18n.t('metadata.title');
-        const metaDesc = i18n.t('metadata.description');
-        const metaKeywords = i18n.t('metadata.keywords');
+        const metaTitle = "فکر اسلام | اسلامی کتب، آڈیو اور ویڈیو لائبریری";
+        const metaDesc = "مستند اسلامی مواد دریافت کریں جس میں کتب، قرآنی تلاوت، خطبات اور تعلیمی ویڈیوز شامل ہیں۔";
+        const metaKeywords = "اسلامی کتب، قرآن، اسلامی آڈیو، اسلامی خطبات، اسلامی تعلیم، مسلم وسائل";
 
-        if (metaTitle && metaTitle !== 'metadata.title') {
-            document.title = metaTitle;
-            document.querySelector('meta[property="og:title"]')?.setAttribute('content', metaTitle);
-            document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', metaTitle);
-        }
+        document.title = metaTitle;
+        document.querySelector('meta[property="og:title"]')?.setAttribute('content', metaTitle);
+        document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', metaTitle);
 
-        if (metaDesc && metaDesc !== 'metadata.description') {
-            document.querySelector('meta[name="description"]')?.setAttribute('content', metaDesc);
-            document.querySelector('meta[property="og:description"]')?.setAttribute('content', metaDesc);
-            document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', metaDesc);
-        }
+        document.querySelector('meta[name="description"]')?.setAttribute('content', metaDesc);
+        document.querySelector('meta[property="og:description"]')?.setAttribute('content', metaDesc);
+        document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', metaDesc);
 
-        if (metaKeywords && metaKeywords !== 'metadata.keywords') {
-            document.querySelector('meta[name="keywords"]')?.setAttribute('content', metaKeywords);
-        }
-
-        if (i18n.language !== 'ur') {
-            i18n.changeLanguage('ur');
-        }
-    }, [i18n]);
+        document.querySelector('meta[name="keywords"]')?.setAttribute('content', metaKeywords);
+    }, []);
 
     // No-op functions since we're Urdu-only now
     const toggleLanguage = () => { };

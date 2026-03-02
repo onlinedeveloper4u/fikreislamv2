@@ -4,14 +4,11 @@ import { ArrowRight, Upload, Sparkles } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useContentStats } from "@/hooks/useContentStats";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 
 const CallToAction = () => {
   const { data: stats, isLoading } = useContentStats();
-  const { t } = useTranslation();
-
-  const containerVariants = {
+const containerVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
@@ -61,10 +58,10 @@ const CallToAction = () => {
                   <Sparkles className="w-8 h-8" />
                 </div>
                 <h3 className="font-display text-3xl md:text-4xl font-bold mb-6">
-                  {t("home.cta.userTitle")}
+                  {"اپنا سفر شروع کریں"}
                 </h3>
                 <p className="opacity-90 mb-10 leading-relaxed text-lg lg:text-xl">
-                  {t("home.cta.userDesc")}
+                  {"ہزاروں مستند اسلامی وسائل تک رسائی حاصل کرنے، اپنے پسندیدہ کو محفوظ کرنے، اور اپنے سیکھنے کے لیے ذاتی نوعیت کی فہرستیں بنانے کے لیے ایک مفت اکاؤنٹ بنائیں۔"}
                 </p>
                 <Button
                   variant="secondary"
@@ -73,7 +70,7 @@ const CallToAction = () => {
                   asChild
                 >
                   <Link to="/register">
-                    {t("home.cta.getStarted")}
+                    {"مفت شروع کریں"}
                     <ArrowRight className="w-6 h-6 ml-2 group-hover/btn:translate-x-2 transition-transform" />
                   </Link>
                 </Button>
@@ -89,24 +86,24 @@ const CallToAction = () => {
             <motion.div variants={itemVariants} className="inline-flex items-center gap-6 mb-10">
               <motion.img
                 src={logo}
-                alt={t("common.brand")}
+                alt={"فکر اسلام"}
                 className="w-24 h-24 drop-shadow-xl"
                 animate={{ rotate: [0, 5, -5, 0] }}
                 transition={{ duration: 6, repeat: Infinity }}
               />
-              <span className="font-display text-4xl font-bold text-foreground tracking-tight">{t("common.brand")}</span>
+              <span className="font-display text-4xl font-bold text-foreground tracking-tight">{"فکر اسلام"}</span>
             </motion.div>
             <motion.p variants={itemVariants} className="text-muted-foreground text-lg max-w-2xl mx-auto mb-12 leading-relaxed">
-              {t("home.cta.joinThousands")}
+              {"اسلامی علم کے حصول میں دنیا بھر کے ہزاروں مسلمانوں میں شامل ہوں"}
             </motion.p>
             <motion.div
               variants={containerVariants}
               className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12"
             >
               {[
-                { label: t("home.cta.islamicBooks"), key: "books" },
-                { label: t("home.cta.audioLectures"), key: "audio" },
-                { label: t("home.cta.videoContent"), key: "video" },
+                { label: "اسلامی کتب", key: "books" },
+                { label: "آڈیو خطبات", key: "audio" },
+                { label: "ویڈیو مواد", key: "video" },
               ].map((stat, idx) => (
                 <motion.div key={idx} variants={itemVariants} className="text-center group">
                   <div className="bg-card/50 glass border border-border/50 rounded-2xl p-6 transition-transform group-hover:-translate-y-2 duration-300">

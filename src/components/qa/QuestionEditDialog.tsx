@@ -10,7 +10,6 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { useTranslation } from 'react-i18next';
 
 interface QuestionEditDialogProps {
   open: boolean;
@@ -28,7 +27,6 @@ export function QuestionEditDialog({
   onQuestionUpdated,
 }: QuestionEditDialogProps) {
   const { toast } = useToast();
-  const { t } = useTranslation();
   const [question, setQuestion] = useState(currentQuestion);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -46,16 +44,16 @@ export function QuestionEditDialog({
       if (error) throw error;
 
       toast({
-        title: t('qa.list.questionUpdated'),
-        description: t('qa.list.updatedSuccess'),
+        title: "سوال تبدیل ہو گیا",
+        description: "سوال کامیابی سے تبدیل ہو گیا ہے",
       });
       onQuestionUpdated();
       onOpenChange(false);
     } catch (error) {
       console.error('Error updating question:', error);
       toast({
-        title: t('qa.form.errorTitle'),
-        description: t('qa.form.errorDesc'),
+        title: "غلطی",
+        description: "سوال تبدیل کرنے میں ناکامی",
         variant: 'destructive',
       });
     } finally {
@@ -67,14 +65,14 @@ export function QuestionEditDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('qa.list.editTitle')}</DialogTitle>
+          <DialogTitle>سوال میں ترمیم کریں</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <Textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             className="min-h-[100px]"
-            placeholder={t('qa.form.placeholder')}
+            placeholder="اپنا سوال یہاں درج کریں..."
           />
           <DialogFooter className="mt-4">
             <Button
@@ -82,10 +80,10 @@ export function QuestionEditDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              {t('common.cancel')}
+              منسوخ
             </Button>
             <Button type="submit" disabled={isSubmitting || !question.trim()}>
-              {isSubmitting ? t('settings.profile.saving') : t('common.save')}
+              {isSubmitting ? "محفوظ ہو رہا ہے..." : "محفوظ کریں"}
             </Button>
           </DialogFooter>
         </form>

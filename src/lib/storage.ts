@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { resolveIADownloadUrl, resolveIAItemUrl } from '@/lib/internetArchive';
 
 /**
  * Generate a signed URL for a file in the content-files bucket
@@ -13,6 +14,7 @@ export async function getSignedUrl(
 ): Promise<string | null> {
   if (!path) return null;
   if (path.includes('google-drive://')) return null;
+  if (path.includes('ia://')) return null; // IA files are publicly accessible
 
   // Extract the path from a full public URL if necessary
   const bucketPath = extractPathFromUrl(path);
@@ -267,11 +269,35 @@ export async function moveFileInGoogleDrive(fileId: string, folderId: string): P
 }
 
 /**
- * Resolves an internal URL (like google-drive://) to an external accessible URL.
+ * Resolves an internal URL (like google-drive:// or ia://) to an external accessible URL.
  * If the URL is already http/https, returns as is.
  */
 export function resolveExternalUrl(url: string | null): string {
   if (!url) return '';
+
+  if (url.includes('ia://')) {
+    return resolveIADownloadUrl(url);
+  }
+
+  if (url.includes('google-drive://')) {
+    const parts = url.split('google-drive://');
+    let fileId = parts[1];
+    if (fileId.includes('?')) fileId = fileId.split('?')[0];
+    return `https://drive.google.com/file/d/${fileId}/view`;
+  }
+
+  return url;
+}
+
+/**
+ * Resolves an internal URL to a detail/item page URL (for viewing on the service).
+ */
+export function resolveItemPageUrl(url: string | null): string {
+  if (!url) return '';
+
+  if (url.includes('ia://')) {
+    return resolveIAItemUrl(url);
+  }
 
   if (url.includes('google-drive://')) {
     const parts = url.split('google-drive://');

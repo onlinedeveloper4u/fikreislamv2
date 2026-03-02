@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { useTranslation } from 'react-i18next';
 import { Loader2, Plus, Trash2, Pencil, Check, X, Mic2 } from 'lucide-react';
 import { renameFolderByIdInGoogleDrive, createFolderInGoogleDrive, deleteFolderByIdInGoogleDrive } from '@/lib/storage';
 
@@ -17,8 +16,7 @@ interface Speaker {
 }
 
 export function SpeakerManagement() {
-    const { t } = useTranslation();
-    const [speakers, setSpeakers] = useState<Speaker[]>([]);
+const [speakers, setSpeakers] = useState<Speaker[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [newName, setNewName] = useState('');
@@ -43,7 +41,7 @@ export function SpeakerManagement() {
             setSpeakers(data || []);
         } catch (error: any) {
             console.error('Error fetching speakers:', error);
-            toast.error(t('common.error'));
+            toast.error("ایک غلطی واقع ہوئی ہے");
         } finally {
             setLoading(false);
         }
@@ -57,7 +55,7 @@ export function SpeakerManagement() {
         try {
             const exists = speakers.some(s => s.name.toLowerCase() === newName.trim().toLowerCase());
             if (exists) {
-                throw new Error(t('dashboard.taxonomyManagement.duplicateError'));
+                throw new Error("یہ نام پہلے سے موجود ہے");
             }
 
             // Google Drive Folder Automation
@@ -77,12 +75,12 @@ export function SpeakerManagement() {
 
             if (error) throw error;
 
-            toast.success(t('common.success'));
+            toast.success("کامیاب");
             setNewName('');
             fetchSpeakers();
         } catch (error: any) {
             console.error('Add error:', error);
-            toast.error(error.message || t('common.error'));
+            toast.error(error.message || "ایک غلطی واقع ہوئی ہے");
         } finally {
             setActionLoading(null);
         }
@@ -96,7 +94,7 @@ export function SpeakerManagement() {
             const itemToEdit = speakers.find(s => s.id === id);
             const exists = speakers.some(s => s.id !== id && s.name.toLowerCase() === editName.trim().toLowerCase());
             if (exists) {
-                throw new Error(t('dashboard.taxonomyManagement.duplicateError'));
+                throw new Error("یہ نام پہلے سے موجود ہے");
             }
 
             const { error } = await supabase
@@ -130,20 +128,20 @@ export function SpeakerManagement() {
                 }
             }
 
-            toast.success(t('common.success'));
+            toast.success("کامیاب");
             setEditingId(null);
             setEditName('');
             fetchSpeakers();
         } catch (error: any) {
             console.error('Edit error:', error);
-            toast.error(error.message || t('common.error'));
+            toast.error(error.message || "ایک غلطی واقع ہوئی ہے");
         } finally {
             setActionLoading(null);
         }
     };
 
     const handleDelete = async (id: string, name: string) => {
-        if (!window.confirm(t('dashboard.taxonomyManagement.confirmDelete', { name }))) return;
+        if (!window.confirm(`کیا آپ واقعی "{{name}}" کو حذف کرنا چاہتے ہیں؟`)) return;
 
         setActionLoading(id);
         try {
@@ -165,11 +163,11 @@ export function SpeakerManagement() {
                 }
             }
 
-            toast.success(t('common.success'));
+            toast.success("کامیاب");
             setSpeakers(prev => prev.filter(s => s.id !== id));
         } catch (error: any) {
             console.error('Delete error:', error);
-            toast.error(t('common.error'));
+            toast.error("ایک غلطی واقع ہوئی ہے");
         } finally {
             setActionLoading(null);
         }
@@ -190,23 +188,23 @@ export function SpeakerManagement() {
                     <Mic2 className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                    <CardTitle>{t('dashboard.taxonomyManagement.types.speaker')}</CardTitle>
-                    <CardDescription>{t('dashboard.taxonomyManagement.descriptions.speaker')}</CardDescription>
+                    <CardTitle>{"مقرر"}</CardTitle>
+                    <CardDescription>{"اپنے مواد کے لیے مقررین (بیان کنندگان) کا نظم کریں۔"}</CardDescription>
                 </div>
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleAddSpeaker} className="flex gap-4 items-end mb-8">
                     <div className="space-y-2 flex-1">
-                        <Label>{t('dashboard.taxonomyManagement.name')}</Label>
+                        <Label>{"نام"}</Label>
                         <Input
                             value={newName}
                             onChange={(e) => setNewName(e.target.value)}
-                            placeholder={t('dashboard.taxonomyManagement.placeholder', { type: t('dashboard.taxonomyManagement.types.speaker') })}
+                            placeholder={`نیا ${"مقرر"} کا نام درج کریں...`}
                             required
                         />
                     </div>
                     <Button type="submit" disabled={actionLoading === 'add'}>
-                        {actionLoading === 'add' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4 mr-2" /> {t('dashboard.taxonomyManagement.add')}</>}
+                        {actionLoading === 'add' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4 mr-2" /> {"شامل کریں"}</>}
                     </Button>
                 </form>
 
@@ -255,7 +253,7 @@ export function SpeakerManagement() {
                     ))}
                     {speakers.length === 0 && (
                         <p className="text-center py-8 text-muted-foreground italic">
-                            {t('dashboard.taxonomyManagement.noItems', { type: t('dashboard.taxonomyManagement.types.speaker') })}
+                            {`کوئی ${"مقرر"} نہیں ملا۔`}
                         </p>
                     )}
                 </div>

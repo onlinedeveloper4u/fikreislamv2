@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { MessageCirclePlus } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 
 interface QuestionFormProps {
   onQuestionAdded: () => void;
@@ -14,7 +13,6 @@ interface QuestionFormProps {
 export function QuestionForm({ onQuestionAdded }: QuestionFormProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t } = useTranslation();
   const [question, setQuestion] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -26,23 +24,23 @@ export function QuestionForm({ onQuestionAdded }: QuestionFormProps) {
     try {
       const { error } = await supabase.from('questions').insert({
         user_id: user.id,
-        content_type: 'book', // Default value since content_type is required
+        content_type: 'book',
         question: question.trim(),
       });
 
       if (error) throw error;
 
       toast({
-        title: t('qa.form.successTitle'),
-        description: t('qa.form.successDesc'),
+        title: "کامیاب",
+        description: "آپ کا سوال جمع کر دیا گیا ہے!",
       });
       setQuestion('');
       onQuestionAdded();
     } catch (error) {
       console.error('Error submitting question:', error);
       toast({
-        title: t('qa.form.errorTitle'),
-        description: t('qa.form.errorDesc'),
+        title: "غلطی",
+        description: "سوال جمع کرانے میں ناکامی",
         variant: 'destructive',
       });
     } finally {
@@ -53,7 +51,7 @@ export function QuestionForm({ onQuestionAdded }: QuestionFormProps) {
   if (!user) {
     return (
       <p className="text-sm text-muted-foreground text-center py-4">
-        {t('qa.form.loginToAsk')}
+        سوال پوچھنے کے لیے داخل ہوں
       </p>
     );
   }
@@ -61,14 +59,14 @@ export function QuestionForm({ onQuestionAdded }: QuestionFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <Textarea
-        placeholder={t('qa.form.placeholder')}
+        placeholder="اپنا سوال یہاں درج کریں..."
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
         className="min-h-[80px]"
       />
       <Button type="submit" disabled={isSubmitting || !question.trim()}>
         <MessageCirclePlus className="h-4 w-4 mr-2" />
-        {isSubmitting ? t('qa.form.submitting') : t('qa.form.submit')}
+        {isSubmitting ? "جمع ہو رہا ہے..." : "سوال جمع کرائیں"}
       </Button>
     </form>
   );

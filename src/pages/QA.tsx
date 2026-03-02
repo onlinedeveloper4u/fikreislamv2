@@ -1,13 +1,10 @@
 import Layout from "@/components/layout/Layout";
 import { QASection } from "@/components/qa/QASection";
 import { HelpCircle } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 
 const QA = () => {
-  const { t } = useTranslation();
-
-  return (
+return (
     <Layout>
       <div className="container mx-auto px-4 py-12">
         <motion.div
@@ -26,10 +23,10 @@ const QA = () => {
             </motion.div>
             <div>
               <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground tracking-tight mb-3">
-                {t('qa.title')}
+                {"سوال و جواب"}
               </h1>
               <p className="text-muted-foreground text-lg max-w-2xl opacity-80">
-                {t('qa.subtitle')}
+                {"علماء اور ماہرین کی ہماری کمیونٹی سے اپنے سوالات کے مستند جوابات حاصل کریں۔"}
               </p>
             </div>
           </div>

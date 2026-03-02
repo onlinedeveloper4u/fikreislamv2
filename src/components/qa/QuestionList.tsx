@@ -9,7 +9,6 @@ import { Loader2, MessageCircle, User, Calendar, Pencil, Trash2, Search } from '
 import { AnswerForm } from './AnswerForm';
 import { QuestionEditDialog } from './QuestionEditDialog';
 import { useToast } from '@/hooks/use-toast';
-import { useTranslation } from 'react-i18next';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,7 +42,6 @@ interface QuestionListProps {
 export function QuestionList({ refreshTrigger }: QuestionListProps) {
   const { user, role } = useAuth();
   const { toast } = useToast();
-  const { t } = useTranslation();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, Answer[]>>({});
   const [loading, setLoading] = useState(true);
@@ -90,8 +88,8 @@ export function QuestionList({ refreshTrigger }: QuestionListProps) {
     } catch (error) {
       console.error('Error fetching Q&A:', error);
       toast({
-        title: t('qa.form.errorTitle'),
-        description: t('qa.list.loadError'),
+        title: "غلطی",
+        description: "سوالات لوڈ کرنے میں ناکامی",
         variant: 'destructive',
       });
     } finally {
@@ -111,15 +109,15 @@ export function QuestionList({ refreshTrigger }: QuestionListProps) {
       if (error) throw error;
 
       toast({
-        title: t('qa.list.questionDeleted'),
-        description: t('qa.list.deletedSuccess'),
+        title: "سوال حذف ہو گیا",
+        description: "سوال کامیابی سے حذف کر دیا گیا",
       });
       fetchData();
     } catch (error) {
       console.error('Error deleting question:', error);
       toast({
-        title: t('qa.form.errorTitle'),
-        description: t('qa.form.errorDesc'),
+        title: "غلطی",
+        description: "عمل مکمل کرنے میں ناکامی",
         variant: 'destructive',
       });
     } finally {
@@ -153,7 +151,7 @@ export function QuestionList({ refreshTrigger }: QuestionListProps) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         <MessageCircle className="h-10 w-10 mx-auto mb-2 opacity-50" />
-        <p>{t('qa.list.noQuestions')}</p>
+        <p>کوئی سوال نہیں ملا۔</p>
       </div>
     );
   }
@@ -164,7 +162,7 @@ export function QuestionList({ refreshTrigger }: QuestionListProps) {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder={t('qa.list.searchPlaceholder')}
+          placeholder="سوالات تلاش کریں..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-9"
@@ -174,7 +172,7 @@ export function QuestionList({ refreshTrigger }: QuestionListProps) {
       {filteredQuestions.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           <MessageCircle className="h-10 w-10 mx-auto mb-2 opacity-50" />
-          <p>{searchQuery ? t('qa.list.noMatch') : t('qa.list.noQuestions')}</p>
+          <p>{searchQuery ? "کوئی مماثل سوال نہیں ملا" : "کوئی سوال نہیں ملا۔"}</p>
         </div>
       ) : (
         filteredQuestions.map(question => (
@@ -220,7 +218,7 @@ export function QuestionList({ refreshTrigger }: QuestionListProps) {
                         <div key={answer.id} className="bg-muted/50 rounded-lg p-3">
                           <div className="flex items-center gap-2 mb-1">
                             <Badge variant="secondary" className="text-xs">
-                              {answer.status === 'approved' ? t('dashboard.approvedContent') : t('dashboard.pendingContent')}
+                              {answer.status === 'approved' ? "شائع شدہ" : "زیر التوا"}
                             </Badge>
                             <span className="text-xs text-muted-foreground">
                               {new Date(answer.created_at).toLocaleDateString()}
@@ -258,15 +256,15 @@ export function QuestionList({ refreshTrigger }: QuestionListProps) {
       <AlertDialog open={!!deletingQuestionId} onOpenChange={(open) => !open && setDeletingQuestionId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('qa.list.deleteTitle')}</AlertDialogTitle>
+            <AlertDialogTitle>سوال حذف کریں</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('qa.list.deleteDesc')}
+              کیا آپ واقعی اس سوال کو حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں کیا جا سکتا۔
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogCancel>{"منسوخ"}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteQuestion} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              {t('common.delete')}
+              {"حذف کریں"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

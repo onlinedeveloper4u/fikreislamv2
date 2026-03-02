@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ArrowRight, User, Mail, Lock } from "lucide-react";
 import { motion } from "framer-motion";
@@ -18,8 +17,7 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { signUp } = useAuth();
-  const { t } = useTranslation();
-  const navigate = useNavigate();
+const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,8 +25,8 @@ const Register = () => {
 
     if (!fullName || !email || !password || !confirmPassword) {
       toast({
-        title: t("auth.missingFields"),
-        description: t("auth.fillAllFields"),
+        title: "خالی خانے",
+        description: "براہ کرم تمام خانے پُر کریں",
         variant: "destructive",
       });
       return;
@@ -36,8 +34,8 @@ const Register = () => {
 
     if (password !== confirmPassword) {
       toast({
-        title: t("auth.passwordsNotMatch"),
-        description: t("auth.makeSureSame"),
+        title: "پاس ورڈ مختلف ہیں",
+        description: "براہ کرم یقینی بنائیں کہ دونوں پاس ورڈ ایک جیسے ہیں",
         variant: "destructive",
       });
       return;
@@ -45,8 +43,8 @@ const Register = () => {
 
     if (password.length < 6) {
       toast({
-        title: t("auth.passwordShort"),
-        description: t("auth.passwordMinChar"),
+        title: "پاس ورڈ بہت چھوٹا ہے",
+        description: "پاس ورڈ کم از کم 6 حروف کا ہونا چاہیے",
         variant: "destructive",
       });
       return;
@@ -58,13 +56,13 @@ const Register = () => {
 
     if (error) {
       let message = error.message;
-      let title = t("auth.loginFailed");
+      let title = "ناکامی";
 
       if (error.message.includes("already registered")) {
-        message = t("auth.alreadyRegistered");
+        message = "یہ ای میل پہلے سے اندراج شدہ ہے";
       } else if (error.message.toLowerCase().includes("rate limit") || error.message.toLowerCase().includes("too many requests")) {
-        title = t("auth.rateLimitExceeded");
-        message = t("auth.rateLimitMessage");
+        title = "بہت زیادہ کوششیں";
+        message = "براہ کرم تھوڑی دیر بعد دوبارہ کوشش کریں";
       }
 
       toast({
@@ -78,14 +76,14 @@ const Register = () => {
 
     if (!session) {
       toast({
-        title: t("auth.checkEmail"),
-        description: t("auth.verificationSent"),
+        title: "ای میل چیک کریں",
+        description: "تصدیقی لنک آپ کے ای میل پر بھیج دیا گیا ہے",
       });
       navigate("/login");
     } else {
       toast({
-        title: t("auth.accountCreated"),
-        description: t("auth.accountCreatedWelcome"),
+        title: "اکاؤنٹ بن گیا!",
+        description: "خوش آمدید! آپ کا اکاؤنٹ کامیابی سے بن گیا ہے",
       });
       navigate("/");
     }
@@ -149,7 +147,7 @@ const Register = () => {
                 transition={{ delay: 0.4 }}
                 className="font-display text-4xl font-bold text-foreground mb-4 tracking-tight"
               >
-                {t("auth.createAccount")}
+                {"اکاؤنٹ بنائیں"}
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
@@ -157,7 +155,7 @@ const Register = () => {
                 transition={{ delay: 0.5 }}
                 className="text-muted-foreground text-lg opacity-80"
               >
-                {t("auth.joinCommunity")}
+                {"مستند اسلامی علم کی کمیونٹی میں شامل ہوں"}
               </motion.p>
             </div>
 
@@ -169,13 +167,13 @@ const Register = () => {
                   transition={{ delay: 0.6 }}
                   className="space-y-3"
                 >
-                  <Label htmlFor="name" className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">{t("auth.fullName")}</Label>
+                  <Label htmlFor="name" className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">{"پورا نام"}</Label>
                   <div className="relative group">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input
                       id="name"
                       type="text"
-                      placeholder={t("auth.fullNamePlaceholder")}
+                      placeholder={"اپنا پورا نام درج کریں"}
                       className="h-14 pl-12 bg-background/50 border-border/40 focus:border-primary/50 text-lg rounded-2xl transition-all"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
@@ -190,7 +188,7 @@ const Register = () => {
                   transition={{ delay: 0.6 }}
                   className="space-y-3"
                 >
-                  <Label htmlFor="email" className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">{t("auth.email")}</Label>
+                  <Label htmlFor="email" className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">{"ای میل"}</Label>
                   <div className="relative group">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input
@@ -213,8 +211,8 @@ const Register = () => {
                   transition={{ delay: 0.7 }}
                   className="space-y-3"
                 >
-                  <Label htmlFor="password" title={t("auth.password")} className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">
-                    {t("auth.password")}
+                  <Label htmlFor="password" title={"پاس ورڈ"} className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">
+                    {"پاس ورڈ"}
                   </Label>
                   <div className="relative group">
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -236,8 +234,8 @@ const Register = () => {
                   transition={{ delay: 0.7 }}
                   className="space-y-3"
                 >
-                  <Label htmlFor="confirmPassword" title={t("auth.confirmPassword")} className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">
-                    {t("auth.confirmPassword")}
+                  <Label htmlFor="confirmPassword" title={"پاس ورڈ کی تصدیق"} className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">
+                    {"پاس ورڈ کی تصدیق"}
                   </Label>
                   <div className="relative group">
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -268,11 +266,11 @@ const Register = () => {
                   {isLoading ? (
                     <div className="flex items-center gap-3">
                       <Loader2 className="h-6 w-6 animate-spin" />
-                      <span>{t("auth.creatingAccount")}</span>
+                      <span>{"اکاؤنٹ بنایا جا رہا ہے..."}</span>
                     </div>
                   ) : (
                     <div className="flex items-center justify-center gap-3">
-                      <span>{t("auth.createAccount")}</span>
+                      <span>{"اکاؤنٹ بنائیں"}</span>
                       <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
                     </div>
                   )}
@@ -287,9 +285,9 @@ const Register = () => {
               className="text-center mt-12 pt-8 border-t border-border/20"
             >
               <p className="text-muted-foreground text-lg">
-                {t("auth.alreadyAccount")}{" "}
+                {"پہلے سے اکاؤنٹ ہے؟"}{" "}
                 <Link to="/login" className="text-primary hover:text-primary/80 font-bold transition-colors">
-                  {t("auth.signIn")}
+                  {"داخل ہوں"}
                 </Link>
               </p>
             </motion.div>

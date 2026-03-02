@@ -11,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AddToPlaylistDialog } from './AddToPlaylistDialog';
 import { MediaPlayer } from './MediaPlayer';
-import { useTranslation } from 'react-i18next';
 import { motion, Variants, AnimatePresence } from 'framer-motion';
 import {
   Search, Download, Play, FileText, Music, Video,
@@ -84,7 +83,6 @@ export function ContentBrowser({ contentType, title, description }: ContentBrows
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { trackDownload, trackPlay } = useAnalytics();
-  const { t } = useTranslation();
   const [content, setContent] = useState<ContentWithSignedUrls[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,9 +94,9 @@ export function ContentBrowser({ contentType, title, description }: ContentBrows
   const [selectedItem, setSelectedItem] = useState<ContentWithSignedUrls | null>(null);
 
   const typeConfig: Record<ContentType, { icon: React.ElementType; actionLabel: string; actionIcon: React.ElementType }> = {
-    book: { icon: FileText, actionLabel: t('content.browser.download'), actionIcon: Download },
-    audio: { icon: Music, actionLabel: t('content.browser.play'), actionIcon: Play },
-    video: { icon: Video, actionLabel: t('content.browser.watch'), actionIcon: Play },
+    book: { icon: FileText, actionLabel: "حاصل کریں", actionIcon: Download },
+    audio: { icon: Music, actionLabel: "چلائیں", actionIcon: Play },
+    video: { icon: Video, actionLabel: "دیکھیں", actionIcon: Play },
   };
 
   const config = typeConfig[contentType];
@@ -192,7 +190,7 @@ export function ContentBrowser({ contentType, title, description }: ContentBrows
     return (
       <div className="flex flex-col items-center justify-center py-32 space-y-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        <p className="text-muted-foreground animate-pulse font-medium">{t('common.loading')}</p>
+        <p className="text-muted-foreground animate-pulse font-medium">{"لوڈ ہو رہا ہے..."}</p>
       </div>
     );
   }
@@ -231,7 +229,7 @@ export function ContentBrowser({ contentType, title, description }: ContentBrows
         <div className="relative flex-1 group">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
           <Input
-            placeholder={t('content.browser.searchPlaceholder')}
+            placeholder={"عنوان، مصنف، یا تفصیل کے ذریعے تلاش کریں..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-12 h-14 bg-background/50 border-border/40 focus:border-primary/50 text-lg transition-all rounded-2xl"
@@ -243,13 +241,13 @@ export function ContentBrowser({ contentType, title, description }: ContentBrows
             <SelectTrigger className="w-full sm:w-56 h-14 bg-background/50 border-border/40 rounded-2xl text-base">
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4 opacity-50" />
-                <SelectValue placeholder={t('content.browser.language')} />
+                <SelectValue placeholder={"زبان"} />
               </div>
             </SelectTrigger>
             <SelectContent className="glass-dark rounded-2xl">
               {LANGUAGES.map(lang => (
                 <SelectItem key={lang} value={lang} className="h-10">
-                  {t(`common.languages.${LANGUAGE_MAP[lang]}`)}
+                  {lang}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -258,10 +256,10 @@ export function ContentBrowser({ contentType, title, description }: ContentBrows
           {allTags.length > 0 && (
             <Select value={selectedTag || '_all'} onValueChange={(v) => setSelectedTag(v === '_all' ? null : v)}>
               <SelectTrigger className="w-full sm:w-56 h-14 bg-background/50 border-border/40 rounded-2xl text-base">
-                <SelectValue placeholder={t('content.browser.allTags')} />
+                <SelectValue placeholder={"تمام نشانیاں"} />
               </SelectTrigger>
               <SelectContent className="glass-dark rounded-2xl">
-                <SelectItem value="_all" className="h-10">{t('content.browser.allTags')}</SelectItem>
+                <SelectItem value="_all" className="h-10">{"تمام نشانیاں"}</SelectItem>
                 {allTags.map(tag => (
                   <SelectItem key={tag} value={tag} className="h-10">{tag}</SelectItem>
                 ))}
@@ -287,12 +285,12 @@ export function ContentBrowser({ contentType, title, description }: ContentBrows
         <div className="flex items-center gap-2 font-medium tracking-tight">
           <div className="w-2 h-2 rounded-full bg-primary" />
           <span className="uppercase text-[11px] opacity-70">
-            {t('content.browser.itemsFoundCount', { count: filteredContent.length })}
+            {`${filteredContent.length} نتائج`}
           </span>
         </div>
         {hasActiveFilters && (
           <Button variant="link" size="sm" onClick={clearFilters} className="h-auto p-0 font-bold hover:text-primary transition-colors text-[11px] uppercase tracking-wider">
-            {t('content.browser.clearFilters')}
+            {"فلٹرز صاف کریں"}
           </Button>
         )}
       </div>
@@ -307,11 +305,11 @@ export function ContentBrowser({ contentType, title, description }: ContentBrows
           <div className="w-24 h-24 rounded-full bg-muted/30 flex items-center justify-center mx-auto mb-8">
             <Filter className="h-10 w-10 text-muted-foreground/30" />
           </div>
-          <h3 className="text-2xl font-bold text-foreground mb-4">{t('content.browser.noContentFound')}</h3>
+          <h3 className="text-2xl font-bold text-foreground mb-4">{"کوئی مواد نہیں ملا"}</h3>
           <p className="text-muted-foreground max-w-md mx-auto text-lg opacity-70">
             {content.length === 0
-              ? t('content.browser.noApprovedContent')
-              : t('content.browser.adjustSearch')}
+              ? "ابھی تک کوئی منظور شدہ مواد نہیں ہے"
+              : "براہ کرم تلاش کے الفاظ یا فلٹرز تبدیل کریں"}
           </p>
         </motion.div>
       ) : (

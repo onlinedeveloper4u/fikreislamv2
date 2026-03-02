@@ -1,12 +1,10 @@
 import { useMemo } from 'react';
 import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTranslation } from 'react-i18next';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 
 export default function Dashboard() {
     const { user, role, loading } = useAuth();
-    const { t } = useTranslation();
     const location = useLocation();
 
     const activeTab = useMemo(() => {
@@ -15,15 +13,15 @@ export default function Dashboard() {
     }, [location.pathname]);
 
     const tabTitles: Record<string, string> = useMemo(() => ({
-        'analytics': t('dashboard.analytics'),
-        'content': t('dashboard.allContent'),
-        'users': t('dashboard.users'),
-        'uploads': t('dashboard.uploads.title', { defaultValue: 'Upload Status' }),
-        'speakers': t('dashboard.taxonomyManagement.types.speaker'),
-        'languages': t('dashboard.taxonomyManagement.types.language'),
-        'audio-types': t('dashboard.taxonomyManagement.types.audio_type'),
-        'categories': t('dashboard.taxonomyManagement.types.category'),
-    }), [t]);
+        'analytics': "تجزیات",
+        'content': "تمام مواد",
+        'users': "صارفین",
+        'uploads': "شامل کرنے کی صورتحال",
+        'speakers': "مقرر",
+        'languages': "زبان",
+        'audio-types': "آڈیو کی قسم",
+        'categories': "زمرہ",
+    }), []);
 
     if (loading) {
         return (
@@ -40,7 +38,7 @@ export default function Dashboard() {
     return (
         <DashboardLayout
             activeTab={activeTab}
-            pageTitle={tabTitles[activeTab] || t('nav.dashboard')}
+            pageTitle={tabTitles[activeTab] || "ڈیش بورڈ"}
             isDashboard={true}
         >
             <Outlet />

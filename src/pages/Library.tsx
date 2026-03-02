@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import {
   Dialog,
@@ -73,9 +72,7 @@ export default function Library() {
   const navigate = useNavigate();
   const { favorites, toggleFavorite, loading: favLoading } = useFavorites();
   const { playlists, createPlaylist, deletePlaylist, removeFromPlaylist, loading: playlistLoading } = usePlaylists();
-  const { t } = useTranslation();
-
-  const [favoriteContent, setFavoriteContent] = useState<Content[]>([]);
+const [favoriteContent, setFavoriteContent] = useState<Content[]>([]);
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
   const [playlistContent, setPlaylistContent] = useState<Content[]>([]);
   const [loadingContent, setLoadingContent] = useState(false);
@@ -174,7 +171,7 @@ export default function Library() {
       <Layout>
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          <p className="text-muted-foreground animate-pulse font-medium">{t('common.loading')}</p>
+          <p className="text-muted-foreground animate-pulse font-medium">{"لوڈ ہو رہا ہے..."}</p>
         </div>
       </Layout>
     );
@@ -227,7 +224,7 @@ export default function Library() {
               <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border/20">
                 <Button size="sm" onClick={() => handleAction(item)} className="h-9 rounded-xl font-bold shadow-lg shadow-primary/10 flex-1">
                   {item.type === 'book' ? <Download className="h-3.5 w-3.5 mr-2" /> : <Play className="h-3.5 w-3.5 mr-2" />}
-                  {item.type === 'book' ? t('library.content.download') : t('library.content.play')}
+                  {item.type === 'book' ? "حاصل کریں" : "چلائیں"}
                 </Button>
                 <Button
                   size="icon"
@@ -264,33 +261,33 @@ export default function Library() {
                 <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center shadow-xl shadow-primary/20">
                   <Bookmark className="w-8 h-8 text-primary-foreground" />
                 </div>
-                <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground tracking-tight">{t('library.title')}</h1>
+                <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground tracking-tight">{"میرا کتب خانہ"}</h1>
               </div>
-              <p className="text-muted-foreground text-lg max-w-2xl opacity-80 leading-relaxed font-medium">{t('library.subtitle')}</p>
+              <p className="text-muted-foreground text-lg max-w-2xl opacity-80 leading-relaxed font-medium">{"روحانی سیکھنے کے لیے آپ کی ذاتی جگہ۔ اپنے محفوظ کردہ پسندیدہ اور مرضی کی فہرستوں تک رسائی حاصل کریں۔"}</p>
             </div>
 
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="rounded-2xl h-14 px-8 text-base font-bold shadow-xl shadow-primary/10 hover:scale-105 transition-all">
                   <Plus className="h-5 w-5 mr-3" />
-                  {t('library.playlists.createTitle')}
+                  {"فہرست بنائیں"}
                 </Button>
               </DialogTrigger>
               <DialogContent className="glass-dark border-border/50 rounded-[2rem] p-8">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-display font-bold">{t('library.playlists.createTitle')}</DialogTitle>
-                  <DialogDescription className="text-lg opacity-70">{t('library.playlists.createDesc')}</DialogDescription>
+                  <DialogTitle className="text-2xl font-display font-bold">{"فہرست بنائیں"}</DialogTitle>
+                  <DialogDescription className="text-lg opacity-70">{"اپنے مواد کو مرضی کی فہرستوں میں منظم کریں۔"}</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-6 mt-4">
                   <Input
-                    placeholder={t('library.playlists.namePlaceholder')}
+                    placeholder={"فہرست کا نام"}
                     value={newPlaylistName}
                     onChange={(e) => setNewPlaylistName(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleCreatePlaylist()}
                     className="h-14 bg-background/50 border-border/40 focus:border-primary/50 text-lg rounded-2xl"
                   />
                   <Button onClick={handleCreatePlaylist} className="w-full h-14 text-lg font-bold rounded-2xl gradient-primary border-none shadow-xl shadow-primary/20">
-                    {t('common.create')}
+                    {"بنائیں"}
                   </Button>
                 </div>
               </DialogContent>
@@ -303,12 +300,12 @@ export default function Library() {
           <TabsList className="flex w-fit bg-card/40 p-1.5 rounded-2xl glass-dark border border-border/40 shadow-xl overflow-hidden">
             <TabsTrigger value="favorites" className="flex items-center gap-3 px-8 py-3.5 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all text-base font-bold">
               <Heart className="h-5 w-5" />
-              {t('library.tabs.favorites')}
+              {"پسندیدہ"}
               <Badge variant="outline" className="ml-2 bg-background/10 border-white/10 text-inherit text-[10px] font-black">{favorites.size}</Badge>
             </TabsTrigger>
             <TabsTrigger value="playlists" className="flex items-center gap-3 px-8 py-3.5 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all text-base font-bold">
               <ListMusic className="h-5 w-5" />
-              {t('library.tabs.playlists')}
+              {"فہرستیں"}
               <Badge variant="outline" className="ml-2 bg-background/10 border-white/10 text-inherit text-[10px] font-black">{playlists.length}</Badge>
             </TabsTrigger>
           </TabsList>
@@ -327,9 +324,9 @@ export default function Library() {
                     </div>
                     <div>
                       <CardTitle className="text-3xl font-display font-bold leading-tight">
-                        {t('library.favorites.title')}
+                        {"آپ کے پسندیدہ"}
                       </CardTitle>
-                      <CardDescription className="text-lg opacity-70 mt-1">{t('library.favorites.desc')}</CardDescription>
+                      <CardDescription className="text-lg opacity-70 mt-1">{"فوری رسائی کے لیے آپ کا پسند کیا ہوا مواد۔"}</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
@@ -337,13 +334,13 @@ export default function Library() {
                   {loadingContent ? (
                     <div className="flex flex-col items-center justify-center py-24 gap-4">
                       <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                      <p className="text-muted-foreground animate-pulse font-medium">{t('common.loading')}</p>
+                      <p className="text-muted-foreground animate-pulse font-medium">{"لوڈ ہو رہا ہے..."}</p>
                     </div>
                   ) : favoriteContent.length === 0 ? (
                     <div className="text-center py-24 bg-muted/10 rounded-[2rem] border-2 border-dashed border-border/30">
                       <Heart className="h-16 w-16 text-muted-foreground/20 mx-auto mb-6" />
                       <p className="text-xl font-bold text-muted-foreground">
-                        {t('library.favorites.empty')}
+                        {"ابھی تک کوئی پسندیدہ نہیں ہے۔ ہوم پیج پر جائیں اور وہ مواد پسند کریں جو آپ کو اچھا لگے!"}
                       </p>
                     </div>
                   ) : (
@@ -373,7 +370,7 @@ export default function Library() {
               <Card className="border-border/40 bg-card/30 glass-dark rounded-[2.5rem] shadow-2xl overflow-hidden lg:col-span-1 border-t-4 border-t-primary/20">
                 <CardHeader className="p-8">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-2xl font-display font-bold">{t('library.playlists.title')}</CardTitle>
+                    <CardTitle className="text-2xl font-display font-bold">{"آپ کی فہرستیں"}</CardTitle>
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                       <ListMusic className="h-6 w-6" />
                     </div>
@@ -387,7 +384,7 @@ export default function Library() {
                   ) : playlists.length === 0 ? (
                     <div className="text-center py-12 bg-muted/10 rounded-2xl border-2 border-dashed border-border/30">
                       <p className="text-sm font-bold text-muted-foreground">
-                        {t('library.playlists.empty')}
+                        {"ابھی تک کوئی فہرست نہیں بنائی گئی ہے۔"}
                       </p>
                     </div>
                   ) : (
@@ -409,7 +406,7 @@ export default function Library() {
                             <div>
                               <p className="font-bold text-lg leading-snug">{playlist.name}</p>
                               <p className={`text-xs font-bold uppercase tracking-widest mt-1 ${selectedPlaylist?.id === playlist.id ? 'text-white/70' : 'text-muted-foreground'}`}>
-                                {t('library.playlists.itemCount', { count: playlist.item_count })}
+                                {`${playlist.item_count} شے`}
                               </p>
                             </div>
                           </div>
@@ -419,7 +416,7 @@ export default function Library() {
                             className={`h-10 w-10 rounded-xl transition-colors ${selectedPlaylist?.id === playlist.id ? 'hover:bg-red-500 hover:text-white' : 'hover:bg-red-500/10 hover:text-red-500'}`}
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (confirm(t('common.confirmDelete'))) {
+                              if (confirm("کیا آپ واقعی اسے حذف کرنا چاہتے ہیں؟")) {
                                 deletePlaylist(playlist.id);
                                 if (selectedPlaylist?.id === playlist.id) {
                                   setSelectedPlaylist(null);
@@ -442,12 +439,12 @@ export default function Library() {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                       <CardTitle className="text-3xl font-display font-bold">
-                        {selectedPlaylist ? selectedPlaylist.name : t('library.playlists.selectPrompt')}
+                        {selectedPlaylist ? selectedPlaylist.name : "اس کے مواد کو دیکھنے کے لیے فہرست منتخب کریں"}
                       </CardTitle>
                       <CardDescription className="text-lg opacity-70 mt-1">
                         {selectedPlaylist
-                          ? t('library.playlists.itemCount', { count: playlistContent.length })
-                          : t('library.playlists.selectPrompt')}
+                          ? `${playlistContent.length} شے`
+                          : "اس کے مواد کو دیکھنے کے لیے فہرست منتخب کریں"}
                       </CardDescription>
                     </div>
                     {selectedPlaylist && (
@@ -462,19 +459,19 @@ export default function Library() {
                     <div className="text-center py-32 bg-muted/10 rounded-[2rem] border-2 border-dashed border-border/30">
                       <ListMusic className="h-20 w-20 text-muted-foreground/20 mx-auto mb-6" />
                       <p className="text-xl font-bold text-muted-foreground">
-                        {t('library.playlists.selectPrompt')}
+                        {"اس کے مواد کو دیکھنے کے لیے فہرست منتخب کریں"}
                       </p>
                     </div>
                   ) : loadingContent ? (
                     <div className="flex flex-col items-center justify-center py-24 gap-4">
                       <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                      <p className="text-muted-foreground animate-pulse font-medium">{t('common.loading')}</p>
+                      <p className="text-muted-foreground animate-pulse font-medium">{"لوڈ ہو رہا ہے..."}</p>
                     </div>
                   ) : playlistContent.length === 0 ? (
                     <div className="text-center py-24 bg-muted/10 rounded-[2rem] border-2 border-dashed border-border/30">
                       <Music className="h-16 w-16 text-muted-foreground/20 mx-auto mb-6" />
                       <p className="text-xl font-bold text-muted-foreground">
-                        {t('library.playlists.emptyPlaylist')}
+                        {"یہ فہرست خالی ہے۔"}
                       </p>
                     </div>
                   ) : (

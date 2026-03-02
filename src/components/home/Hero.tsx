@@ -1,14 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Book, Headphones, Video, Sparkles } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, Variants } from "framer-motion";
 import logo from "@/assets/logo.png";
 
 const Hero = () => {
-  const { t } = useTranslation();
-  const { dir, language } = useLanguage();
+const { dir, language } = useLanguage();
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -71,7 +69,7 @@ const Hero = () => {
           >
             <motion.img
               src={logo}
-              alt={t("common.brand")}
+              alt={"فکر اسلام"}
               className="w-40 h-40 md:w-56 md:h-56 mx-auto drop-shadow-2xl"
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -84,7 +82,7 @@ const Hero = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 text-primary text-sm font-medium mb-6"
           >
             <Sparkles className="w-4 h-4 animate-glow" />
-            {t("hero.badge")}
+            {"مستند اسلامی علم"}
           </motion.div>
 
           {/* Heading */}
@@ -95,8 +93,8 @@ const Hero = () => {
               : 'text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight'
               }`}
           >
-            {t("hero.title1")}{" "}
-            <span className="text-gradient drop-shadow-sm">{t("hero.title2")}</span>
+            {"فکر"}{" "}
+            <span className="text-gradient drop-shadow-sm">{"اسلام"}</span>
           </motion.h1>
 
           {/* Description */}
@@ -104,7 +102,7 @@ const Hero = () => {
             variants={itemVariants}
             className="text-lg md:text-xl text-muted-foreground/80 max-w-2xl mx-auto mb-10 leading-relaxed"
           >
-            {t("hero.subtitle")}
+            {"مستند اسلامی کتب، خطبات اور ویڈیوز کا ایک جامع ذخیرہ — قابل اعتماد علماء سے"}
           </motion.p>
 
           {/* CTA Buttons */}
@@ -114,12 +112,12 @@ const Hero = () => {
           >
             <Button variant="hero" size="lg" className="w-full sm:w-auto text-base px-8 shadow-glow" asChild>
               <Link to="/register" className="flex items-center gap-2">
-                {t("hero.startJourney")}
+                {"سفر شروع کریں"}
                 <ArrowRight className={`w-5 h-5 transition-transform ${dir === 'rtl' ? 'rotate-180' : ''}`} />
               </Link>
             </Button>
             <Button variant="outline" size="lg" className="w-full sm:w-auto text-base px-8 glass hover:bg-primary/5 border-primary/20" asChild>
-              <Link to="/books">{t("hero.explore")}</Link>
+              <Link to="/books">{"کتب دیکھیں"}</Link>
             </Button>
           </motion.div>
 
@@ -129,9 +127,9 @@ const Hero = () => {
             className="grid grid-cols-1 md:grid-cols-3 gap-6"
           >
             {[
-              { to: "/books", icon: Book, title: t("features.booksTitle"), desc: t("features.booksDesc") },
-              { to: "/audio", icon: Headphones, title: t("features.audioTitle"), desc: t("features.audioDesc") },
-              { to: "/video", icon: Video, title: t("features.videoTitle"), desc: t("features.videoDesc") },
+              { to: "/books", icon: Book, title: "اسلامی کتب", desc: "مستند اسلامی کتب اور علمی متون کا ہمارا مجموعہ دیکھیں۔" },
+              { to: "/audio", icon: Headphones, title: "آڈیو خطبات", desc: "مختلف علماء کے بصیرت افروز خطبات، سلسلے اور قرآنی تلاوت سنیں۔" },
+              { to: "/video", icon: Video, title: "ویڈیو ذخیرہ", desc: "اسلامی تعلیمات پر مبنی تعلیمی ویڈیوز، دستاویزی فلمیں اور لائیو نشستیں دیکھیں۔" },
             ].map((card, idx) => (
               <motion.div key={idx} variants={itemVariants}>
                 <Link

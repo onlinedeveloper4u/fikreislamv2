@@ -15,8 +15,6 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import { useTranslation } from "react-i18next";
-
 interface MetadataComboboxProps {
     options: string[];
     value: string;
@@ -38,9 +36,7 @@ export function MetadataCombobox({
 }: MetadataComboboxProps) {
     const [open, setOpen] = React.useState(false);
     const [search, setSearch] = React.useState("");
-    const { t } = useTranslation();
-
-    const filteredOptions = options.filter((option) =>
+const filteredOptions = options.filter((option) =>
         option.toLowerCase().includes(search.toLowerCase())
     );
 
@@ -56,7 +52,7 @@ export function MetadataCombobox({
                     className="w-full justify-between h-14 bg-background/50 border-border/40 hover:bg-background/80 transition-all font-normal items-center px-4"
                 >
                     <span className="overflow-visible whitespace-nowrap pt-1">
-                        {value || placeholder || t('common.select')}
+                        {value || placeholder || "منتخب کریں"}
                     </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -64,13 +60,13 @@ export function MetadataCombobox({
             <PopoverContent className="w-full min-w-[var(--radix-popover-trigger-width)] p-0" align="start">
                 <Command>
                     <CommandInput
-                        placeholder={searchPlaceholder || t('common.search')}
+                        placeholder={searchPlaceholder || "تلاش"}
                         value={search}
                         onValueChange={setSearch}
                     />
                     <CommandList>
                         <CommandEmpty>
-                            {!showCustom && (emptyMessage || t('common.noResults'))}
+                            {!showCustom && (emptyMessage || "کوئی نتیجہ نہیں ملا")}
                         </CommandEmpty>
                         <CommandGroup>
                             {options.map((option) => (
@@ -105,7 +101,7 @@ export function MetadataCombobox({
                                     className="text-primary font-medium cursor-pointer"
                                 >
                                     <Plus className="mr-2 h-4 w-4" />
-                                    {t('common.add')} "{search}"
+                                    {"شامل کریں"} "{search}"
                                 </CommandItem>
                             </CommandGroup>
                         )}

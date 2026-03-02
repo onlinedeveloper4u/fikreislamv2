@@ -8,15 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { useTranslation } from 'react-i18next';
 import { formatBytes } from '@/lib/utils';
 import {
-    Upload, Music, Loader2, Headphones
+    Upload, Music, Loader2, Headphones, Archive, HardDrive
 } from 'lucide-react';
 
 import { useUpload } from '@/contexts/UploadContextTypes';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MetadataCombobox } from './MetadataCombobox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const ALLOWED_AUDIO_TYPES = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4', 'audio/x-m4a'];
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -30,13 +30,12 @@ interface AudioUploadFormProps {
 export function AudioUploadForm({ onSuccess }: AudioUploadFormProps) {
     const { user } = useAuth();
     const { uploadContent } = useUpload();
-    const { t } = useTranslation();
-
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [title, setTitle] = useState('');
     const [language, setLanguage] = useState('اردو');
     const [file, setFile] = useState<File | null>(null);
     const [coverImage, setCoverImage] = useState<File | null>(null);
+    const [storageProvider, setStorageProvider] = useState<'internet-archive' | 'google-drive'>('internet-archive');
 
     const [metadata, setMetadata] = useState<{
         speaker: string[];
@@ -160,7 +159,13 @@ export function AudioUploadForm({ onSuccess }: AudioUploadFormProps) {
                 <SelectContent>
                     {items.map((item) => (
                         <SelectItem key={item} value={item}>
-                            {type === 'month' && monthType ? t(`common.months.${monthType}.${item}`) : item}
+                            {type === 'month' && monthType ? (() => {
+                                const months: Record<string, Record<string, string>> = {
+                                    gregorian: { "1": "جنوری", "2": "فروری", "3": "مارچ", "4": "اپریل", "5": "مئی", "6": "جون", "7": "جولائی", "8": "اگست", "9": "ستمبر", "10": "اکتوبر", "11": "نومبر", "12": "دسمبر" },
+                                    hijri: { "1": "محرم", "2": "صفر", "3": "ربیع الاول", "4": "ربیع الثانی", "5": "جمادی الاولیٰ", "6": "جمادی الاخریٰ", "7": "رجب", "8": "شعبان", "9": "رمضان", "10": "شوال", "11": "ذی القعدہ", "12": "ذی الحجہ" }
+                                };
+                                return months[monthType]?.[item] || item;
+                            })() : item}
                         </SelectItem>
                     ))}
                 </SelectContent>
@@ -169,9 +174,9 @@ export function AudioUploadForm({ onSuccess }: AudioUploadFormProps) {
     };
 
     const audioSchema = useMemo(() => z.object({
-        title: z.string().trim().min(1, t('dashboard.upload.validation.titleRequired')),
-        language: z.string().min(1, t('dashboard.upload.validation.langRequired')),
-    }), [t]);
+        title: z.string().trim().min(1, "عنوان ضروری ہے"),
+        language: z.string().min(1, "زبان ضروری ہے"),
+    }), []);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0] || null;
@@ -193,24 +198,24 @@ export function AudioUploadForm({ onSuccess }: AudioUploadFormProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!user) { toast.error(t('dashboard.upload.errorLogin')); return; }
-        if (!file) { toast.error(t('dashboard.upload.errorNoFile')); return; }
+        if (!user) { toast.error("مواد شامل کرنے کے لیے آپ کا داخل ہونا ضروری ہے"); return; }
+        if (!file) { toast.error("براہ کرم شامل کرنے کے لیے فائل منتخب کریں"); return; }
 
         const validation = audioSchema.safeParse({ title, language });
         if (!validation.success) { toast.error(validation.error.errors[0].message); return; }
 
-        if (file.size > MAX_FILE_SIZE) { toast.error(t('dashboard.upload.errorFileTooLarge')); return; }
-        if (!ALLOWED_AUDIO_TYPES.includes(file.type)) { toast.error(t('dashboard.upload.errorInvalidType', { type: 'audio', allowed: '.mp3, .wav, .ogg, .m4a' })); return; }
+        if (file.size > MAX_FILE_SIZE) { toast.error("فائل بہت بڑی ہے (زیادہ سے زیادہ 500 ایم بی)"); return; }
+        if (!ALLOWED_AUDIO_TYPES.includes(file.type)) { toast.error("آڈیو کے لیے غلط فائل کی قسم۔ قبول شدہ: .mp3, .wav, .ogg, .m4a"); return; }
 
         if (coverImage) {
-            if (coverImage.size > MAX_IMAGE_SIZE) { toast.error(t('dashboard.upload.errorImageTooLarge')); return; }
-            if (!ALLOWED_IMAGE_TYPES.includes(coverImage.type)) { toast.error(t('dashboard.upload.errorInvalidImage')); return; }
+            if (coverImage.size > MAX_IMAGE_SIZE) { toast.error("تصویر بہت بڑی ہے (زیادہ سے زیادہ 10 ایم بی)"); return; }
+            if (!ALLOWED_IMAGE_TYPES.includes(coverImage.type)) { toast.error("غلط تصویر کی قسم"); return; }
         }
 
         const hasDuration = [durHours, durMinutes, durSeconds].some(p => p !== '' && p !== '0' && p !== '00');
-        if (!hasDuration) { toast.error(t('dashboard.upload.validation.durationRequired')); return; }
-        if (!speaker) { toast.error(t('dashboard.upload.validation.speakerRequired')); return; }
-        if (!audioType) { toast.error(t('dashboard.upload.validation.audioTypeRequired')); return; }
+        if (!hasDuration) { toast.error("دورانیہ ضروری ہے"); return; }
+        if (!speaker) { toast.error("مقرر / بیان کنندہ ضروری ہے"); return; }
+        if (!audioType) { toast.error("آڈیو کی قسم ضروری ہے"); return; }
 
         setIsSubmitting(true);
         try {
@@ -218,7 +223,7 @@ export function AudioUploadForm({ onSuccess }: AudioUploadFormProps) {
                 title,
                 language,
                 contentType: 'audio' as const,
-                useGoogleDrive: true,
+                storageProvider,
                 duration: [durHours.padStart(2, '0') || '00', durMinutes.padStart(2, '0') || '00', durSeconds.padStart(2, '0') || '00'].join(':'),
                 venue: venueManual ? venueText : [venueDistrict, venueTehsil, venueCity, venueArea].filter(Boolean).join(', '),
                 speaker,
@@ -228,16 +233,16 @@ export function AudioUploadForm({ onSuccess }: AudioUploadFormProps) {
                 hDay: hDay ? parseInt(hDay) : null,
                 hMonth: hMonth ? parseInt(hMonth) : null,
                 hYear: hYear ? parseInt(hYear) : null,
-                description: '', // Audio doesn't typically have description in this UI
+                description: '',
                 author: '',
                 tags: [],
             };
 
             uploadContent(uploadData, file, coverImage);
-            toast.info(t('dashboard.upload.started'));
+            toast.info("پس منظر میں شامل ہونا شروع ہو گیا ہے");
             if (onSuccess) onSuccess();
         } catch (error: any) {
-            toast.error(error.message || t('common.error'));
+            toast.error(error.message || "ایک غلطی واقع ہوئی ہے");
         } finally {
             setIsSubmitting(false);
         }
@@ -247,28 +252,28 @@ export function AudioUploadForm({ onSuccess }: AudioUploadFormProps) {
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div className="space-y-2 md:col-span-3">
-                    <Label htmlFor="audio-file">{t('dashboard.upload.fileLabel')} <span className="text-destructive">*</span></Label>
+                    <Label htmlFor="audio-file">{"مواد کی فائل"} <span className="text-destructive">*</span></Label>
                     <div className="border-2 border-dashed border-border rounded-lg px-4 text-center hover:border-primary/50 transition-colors h-[110px] flex items-center justify-center">
                         <input id="audio-file" type="file" accept=".mp3,.wav,.ogg,.m4a" onChange={handleFileChange} className="hidden" />
                         <label htmlFor="audio-file" className="cursor-pointer w-full text-sm text-muted-foreground flex flex-col items-center gap-1">
                             <Headphones className="h-5 w-5" />
                             <span className="max-w-[80%] truncate text-center font-medium">
-                                {file ? (file.name.includes('.') ? file.name.substring(0, file.name.lastIndexOf('.')) : file.name) : t('dashboard.upload.clickToUpload', { type: t('nav.audio') })}
+                                {file ? (file.name.includes('.') ? file.name.substring(0, file.name.lastIndexOf('.')) : file.name) : `${"آڈیو"} شامل کرنے کے لیے یہاں دبائیں`}
                                 {file && <span className="ml-1 text-[10px] text-muted-foreground">({file.name.split('.').pop()?.toUpperCase()})</span>}
                             </span>
                             {file && <span className="text-[10px] text-primary/70">
                                 {formatBytes(file.size, {
-                                    bytes: t('common.units.bytes'),
-                                    kb: t('common.units.kb'),
-                                    mb: t('common.units.mb'),
-                                    gb: t('common.units.gb')
+                                    bytes: "بائٹس",
+                                    kb: "کے بی",
+                                    mb: "ایم بی",
+                                    gb: "جی بی"
                                 })}
                             </span>}
                         </label>
                     </div>
                 </div>
                 <div className="space-y-2 md:col-span-1 flex flex-col items-center">
-                    <Label className="text-[10px]">{t('dashboard.upload.coverLabel')}</Label>
+                    <Label className="text-[10px]">{"سرورق کی تصویر"}</Label>
                     <div className="border-2 border-dashed border-border rounded-full hover:border-primary/50 h-[110px] w-[110px] flex items-center justify-center overflow-hidden relative">
                         <input id="audio-cover" type="file" accept="image/*" onChange={(e) => setCoverImage(e.target.files?.[0] || null)} className="hidden" />
                         <label htmlFor="audio-cover" className="cursor-pointer w-full h-full flex items-center justify-center">
@@ -279,39 +284,71 @@ export function AudioUploadForm({ onSuccess }: AudioUploadFormProps) {
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="audio-title">{t('dashboard.upload.titleLabel')} <span className="text-destructive">*</span></Label>
+                <Label htmlFor="audio-title">{"عنوان"} <span className="text-destructive">*</span></Label>
                 <Input id="audio-title" value={title} onChange={(e) => setTitle(e.target.value)} required />
             </div>
 
             <div className="space-y-2">
-                <Label>{t('dashboard.upload.langLabel')} <span className="text-destructive">*</span></Label>
+                <Label>{"زبان"} <span className="text-destructive">*</span></Label>
                 <MetadataCombobox options={metadata.language} value={language} onChange={setLanguage} />
+            </div>
+
+            <div className="space-y-2">
+                <Label>{"اسٹوریج"}</Label>
+                <RadioGroup
+                    value={storageProvider}
+                    onValueChange={(val) => setStorageProvider(val as 'internet-archive' | 'google-drive')}
+                    className="flex gap-3"
+                >
+                    <label
+                        htmlFor="sp-ia"
+                        className={`flex items-center gap-2 px-4 py-3 rounded-lg border-2 cursor-pointer transition-all flex-1 ${storageProvider === 'internet-archive'
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:border-primary/30'
+                            }`}
+                    >
+                        <RadioGroupItem value="internet-archive" id="sp-ia" />
+                        <Archive className="h-4 w-4 shrink-0" />
+                        <span className="text-sm font-medium">Internet Archive</span>
+                    </label>
+                    <label
+                        htmlFor="sp-gd"
+                        className={`flex items-center gap-2 px-4 py-3 rounded-lg border-2 cursor-pointer transition-all flex-1 ${storageProvider === 'google-drive'
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:border-primary/30'
+                            }`}
+                    >
+                        <RadioGroupItem value="google-drive" id="sp-gd" />
+                        <HardDrive className="h-4 w-4 shrink-0" />
+                        <span className="text-sm font-medium">Google Drive</span>
+                    </label>
+                </RadioGroup>
             </div>
 
             <div className="space-y-6 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <Label>{t('dashboard.upload.durationLabel')} <span className="text-destructive">*</span></Label>
+                        <Label>{"دورانیہ"} <span className="text-destructive">*</span></Label>
                         <div className="flex gap-2" dir="ltr">
-                            <Input type="number" placeholder={t('dashboard.upload.hour')} value={durHours} onChange={(e) => setDurHours(e.target.value)} className="text-center bg-background/50 border-border/40 hover:bg-background/80 transition-all h-12" />
-                            <Input type="number" placeholder={t('dashboard.upload.minute')} value={durMinutes} onChange={(e) => setDurMinutes(e.target.value)} className="text-center bg-background/50 border-border/40 hover:bg-background/80 transition-all h-12" />
-                            <Input type="number" placeholder={t('dashboard.upload.second')} value={durSeconds} onChange={(e) => setDurSeconds(e.target.value)} className="text-center bg-background/50 border-border/40 hover:bg-background/80 transition-all h-12" />
+                            <Input type="number" placeholder={"گھنٹہ"} value={durHours} onChange={(e) => setDurHours(e.target.value)} className="text-center bg-background/50 border-border/40 hover:bg-background/80 transition-all h-12" />
+                            <Input type="number" placeholder={"منٹ"} value={durMinutes} onChange={(e) => setDurMinutes(e.target.value)} className="text-center bg-background/50 border-border/40 hover:bg-background/80 transition-all h-12" />
+                            <Input type="number" placeholder={"سیکنڈ"} value={durSeconds} onChange={(e) => setDurSeconds(e.target.value)} className="text-center bg-background/50 border-border/40 hover:bg-background/80 transition-all h-12" />
                         </div>
                     </div>
                     <div className="space-y-2">
                         <div className="flex items-center justify-between mb-1">
-                            <Label>{t('dashboard.upload.venueLabel')}</Label>
+                            <Label>{"مقام / جگہ"}</Label>
                             <div className="flex items-center gap-2">
                                 <Checkbox id="v-manual" checked={venueManual} onCheckedChange={(v) => setVenueManual(!!v)} />
-                                <Label htmlFor="v-manual" className="text-xs cursor-pointer">{t('dashboard.upload.venueManualLabel')}</Label>
+                                <Label htmlFor="v-manual" className="text-xs cursor-pointer">{"جگہ دستی طور پر درج کریں"}</Label>
                             </div>
                         </div>
-                        {venueManual ? <Input value={venueText} onChange={(e) => setVenueText(e.target.value)} placeholder={t('dashboard.upload.venuePlaceholder')} className="bg-background/50 border-border/40 hover:bg-background/80 transition-all h-12" /> :
+                        {venueManual ? <Input value={venueText} onChange={(e) => setVenueText(e.target.value)} placeholder={"مثلاً اسلام آباد، پاکستان"} className="bg-background/50 border-border/40 hover:bg-background/80 transition-all h-12" /> :
                             <div className="grid grid-cols-2 gap-2">
-                                <Input placeholder={t('dashboard.allContent.venueDistrictPlaceholder', { defaultValue: 'ضلع' })} value={venueDistrict} onChange={(e) => setVenueDistrict(e.target.value)} className="bg-background/50 border-border/40 hover:bg-background/80 transition-all h-12" />
-                                <Input placeholder={t('dashboard.allContent.venueTehsilPlaceholder', { defaultValue: 'تحصیل' })} value={venueTehsil} onChange={(e) => setVenueTehsil(e.target.value)} className="bg-background/50 border-border/40 hover:bg-background/80 transition-all h-12" />
-                                <Input placeholder={t('dashboard.allContent.venueCityPlaceholder', { defaultValue: 'شہر' })} value={venueCity} onChange={(e) => setVenueCity(e.target.value)} className="bg-background/50 border-border/40 hover:bg-background/80 transition-all h-12" />
-                                <Input placeholder={t('dashboard.allContent.venueAreaPlaceholder', { defaultValue: 'علاقہ' })} value={venueArea} onChange={(e) => setVenueArea(e.target.value)} className="bg-background/50 border-border/40 hover:bg-background/80 transition-all h-12" />
+                                <Input placeholder={"ضلع"} value={venueDistrict} onChange={(e) => setVenueDistrict(e.target.value)} className="bg-background/50 border-border/40 hover:bg-background/80 transition-all h-12" />
+                                <Input placeholder={"تحصیل"} value={venueTehsil} onChange={(e) => setVenueTehsil(e.target.value)} className="bg-background/50 border-border/40 hover:bg-background/80 transition-all h-12" />
+                                <Input placeholder={"شہر"} value={venueCity} onChange={(e) => setVenueCity(e.target.value)} className="bg-background/50 border-border/40 hover:bg-background/80 transition-all h-12" />
+                                <Input placeholder={"علاقہ"} value={venueArea} onChange={(e) => setVenueArea(e.target.value)} className="bg-background/50 border-border/40 hover:bg-background/80 transition-all h-12" />
                             </div>
                         }
                     </div>
@@ -319,43 +356,43 @@ export function AudioUploadForm({ onSuccess }: AudioUploadFormProps) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label>{t('dashboard.upload.speakerLabel')} <span className="text-destructive">*</span></Label>
+                        <Label>{"مقرر / بیان کنندہ"} <span className="text-destructive">*</span></Label>
                         <MetadataCombobox options={metadata.speaker} value={speaker} onChange={setSpeaker} />
                     </div>
                     <div className="space-y-2">
-                        <Label>{t('dashboard.upload.audioTypeLabel')} <span className="text-destructive">*</span></Label>
+                        <Label>{"آڈیو کی قسم"} <span className="text-destructive">*</span></Label>
                         <MetadataCombobox options={metadata.audio_type} value={audioType} onChange={setAudioType} />
                     </div>
                 </div>
 
                 <div className="space-y-2">
-                    <Label>{t('dashboard.upload.categoriesLabel')}</Label>
+                    <Label>{"زمرہ جات"}</Label>
                     <MetadataCombobox options={metadata.category} value={categories} onChange={setCategories} />
                 </div>
             </div>
 
             <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                    <Label>{t('dashboard.upload.dateGregorianLabel')}</Label>
+                    <Label>{"عیسوی تاریخ"}</Label>
                     <div className="flex gap-2">
-                        <DatePartSelect type="day" value={gDay} onChange={setGDay} placeholder={t('dashboard.upload.day')} />
-                        <DatePartSelect type="month" value={gMonth} onChange={setGMonth} placeholder={t('dashboard.upload.month')} monthType="gregorian" />
-                        <DatePartSelect type="year" value={gYear} onChange={setGYear} placeholder={t('dashboard.upload.year')} monthType="gregorian" />
+                        <DatePartSelect type="day" value={gDay} onChange={setGDay} placeholder={"دن"} />
+                        <DatePartSelect type="month" value={gMonth} onChange={setGMonth} placeholder={"مہینہ"} monthType="gregorian" />
+                        <DatePartSelect type="year" value={gYear} onChange={setGYear} placeholder={"سال"} monthType="gregorian" />
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <Label>{t('dashboard.upload.dateHijriLabel')}</Label>
+                    <Label>{"ہجری تاریخ"}</Label>
                     <div className="flex gap-2">
-                        <DatePartSelect type="day" value={hDay} onChange={setHDay} placeholder={t('dashboard.upload.day')} />
-                        <DatePartSelect type="month" value={hMonth} onChange={setHMonth} placeholder={t('dashboard.upload.month')} monthType="hijri" />
-                        <DatePartSelect type="year" value={hYear} onChange={setHYear} placeholder={t('dashboard.upload.year')} monthType="hijri" />
+                        <DatePartSelect type="day" value={hDay} onChange={setHDay} placeholder={"دن"} />
+                        <DatePartSelect type="month" value={hMonth} onChange={setHMonth} placeholder={"مہینہ"} monthType="hijri" />
+                        <DatePartSelect type="year" value={hYear} onChange={setHYear} placeholder={"سال"} monthType="hijri" />
                     </div>
                 </div>
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                {t('dashboard.upload.submitAdmin')}
+                {"شامل کریں اور شائع کریں"}
             </Button>
         </form>
     );

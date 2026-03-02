@@ -11,8 +11,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ListMusic, Plus, Loader2 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
 interface AddToPlaylistDialogProps {
   contentId: string;
   open: boolean;
@@ -41,29 +39,26 @@ export function AddToPlaylistDialog({ contentId, open, onOpenChange }: AddToPlay
     }
     setIsCreating(false);
   };
-
-  const { t } = useTranslation();
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ListMusic className="h-5 w-5" />
-            {t('library.playlists.addTitle')}
+            فہرست میں شامل کریں
           </DialogTitle>
           <DialogDescription>
-            {t('library.playlists.addDesc')}
+            اس مواد کو فہرست میں شامل کریں یا نئی فہرست بنائیں
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Create new playlist */}
           <div className="space-y-2">
-            <Label>{t('library.playlists.createLabel')}</Label>
+            <Label>نئی فہرست بنائیں</Label>
             <div className="flex gap-2">
               <Input
-                placeholder={t('library.playlists.namePlaceholder')}
+                placeholder={"فہرست کا نام"}
                 value={newPlaylistName}
                 onChange={(e) => setNewPlaylistName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleCreateAndAdd()}
@@ -89,7 +84,7 @@ export function AddToPlaylistDialog({ contentId, open, onOpenChange }: AddToPlay
             </div>
           ) : playlists.length > 0 ? (
             <div className="space-y-2">
-              <Label>{t('library.playlists.listLabel')}</Label>
+              <Label>موجودہ فہرستیں</Label>
               <div className="max-h-48 overflow-y-auto space-y-2">
                 {playlists.map((playlist) => (
                   <button
@@ -100,7 +95,7 @@ export function AddToPlaylistDialog({ contentId, open, onOpenChange }: AddToPlay
                     <div>
                       <p className="font-medium">{playlist.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {t('library.playlists.itemCount', { count: playlist.item_count })}
+                        {`${playlist.item_count} شے`}
                       </p>
                     </div>
                     <Plus className="h-4 w-4 text-muted-foreground" />
@@ -110,7 +105,7 @@ export function AddToPlaylistDialog({ contentId, open, onOpenChange }: AddToPlay
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-4">
-              {t('library.playlists.noPlaylists')}
+              ابھی تک کوئی فہرست نہیں بنائی گئی ہے۔
             </p>
           )}
         </div>

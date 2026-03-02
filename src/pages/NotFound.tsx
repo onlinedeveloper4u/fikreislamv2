@@ -3,13 +3,9 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Home, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { useTranslation } from "react-i18next";
-
 const NotFound = () => {
   const location = useLocation();
-  const { t } = useTranslation();
-
-  useEffect(() => {
+useEffect(() => {
     console.error(
       "404 Error: User attempted to access non-existent route:",
       location.pathname
@@ -60,10 +56,10 @@ const NotFound = () => {
           >
             <div className="space-y-4">
               <h2 className="text-4xl md:text-5xl font-display font-bold text-foreground tracking-tight">
-                {t('notFound.title')}
+                {"صفحہ نہیں ملا"}
               </h2>
               <p className="text-xl text-muted-foreground max-w-md mx-auto opacity-80 leading-relaxed font-medium">
-                {t('notFound.desc')}
+                {"آپ جو مواد تلاش کر رہے ہیں وہ یا تو منتقل ہو گیا ہے یا موجود نہیں ہے۔"}
               </p>
             </div>
           </motion.div>
@@ -78,7 +74,7 @@ const NotFound = () => {
           <Link to="/">
             <Button size="lg" className="h-14 px-8 rounded-2xl text-lg font-bold gradient-primary shadow-xl shadow-primary/20 hover:scale-105 transition-all group">
               <Home className="ml-3 h-5 w-5" />
-              {t('notFound.returnHome')}
+              {"واپس ہوم پیج"}
               <ArrowRight className="mr-3 h-5 w-5 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all rotate-180" />
             </Button>
           </Link>
@@ -88,7 +84,7 @@ const NotFound = () => {
             onClick={() => window.history.back()}
             className="h-14 px-8 rounded-2xl text-lg font-bold hover:bg-primary/5 hover:text-primary transition-all"
           >
-            {t('notFound.goBack')}
+            {"واپس جائیں"}
           </Button>
         </motion.div>
 
@@ -98,7 +94,7 @@ const NotFound = () => {
           transition={{ delay: 1 }}
           className="mt-20 opacity-30 select-none"
         >
-          <p className="font-display font-black uppercase tracking-[1em] text-sm">{t('common.brand')}</p>
+          <p className="font-display font-black uppercase tracking-[1em] text-sm">{"فکر اسلام"}</p>
         </motion.div>
       </div>
     </div>

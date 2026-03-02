@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { useUpload } from '@/contexts/UploadContextTypes';
 import { supabase } from '@/integrations/supabase/client';
 import { getSignedUrl, deleteFromGoogleDrive, resolveExternalUrl } from '@/lib/storage';
+import { deleteFromInternetArchive } from '@/lib/internetArchive';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { useTranslation } from 'react-i18next';
 import {
   FileText, Music, Video, Check, X, Loader2,
   Clock, CheckCircle, XCircle, Search, ExternalLink,
@@ -81,13 +81,12 @@ export function AllContentList() {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [uploadType, setUploadType] = useState<ContentType>('audio');
   const [editingItem, setEditingItem] = useState<Content | null>(null);
-  const { t } = useTranslation();
-  const { activeUploads, uploadContent, editContent, deleteContent, cancelUpload } = useUpload();
+const { activeUploads, uploadContent, editContent, deleteContent, cancelUpload } = useUpload();
 
   const statusConfig: Record<ContentStatus, { icon: React.ElementType; color: string; label: string }> = {
-    pending: { icon: Clock, color: 'bg-amber-500/10 text-amber-600', label: t('dashboard.unpublishedContent') },
-    approved: { icon: CheckCircle, color: 'bg-green-500/10 text-green-600', label: t('dashboard.published') },
-    rejected: { icon: XCircle, color: 'bg-red-500/10 text-red-600', label: t('dashboard.unpublishedContent') },
+    pending: { icon: Clock, color: 'bg-amber-500/10 text-amber-600', label: "غیر شائع شدہ" },
+    approved: { icon: CheckCircle, color: 'bg-green-500/10 text-green-600', label: "شائع شدہ" },
+    rejected: { icon: XCircle, color: 'bg-red-500/10 text-red-600', label: "غیر شائع شدہ" },
   };
 
   const typeIcons: Record<ContentType, React.ElementType> = {
@@ -119,7 +118,7 @@ export function AllContentList() {
       setContent(contentWithSignedUrls);
     } catch (error: any) {
       console.error('Error fetching content:', error);
-      toast.error(t('dashboard.myContent.loadFailed'));
+      toast.error("آپ کا مواد لوڈ کرنے میں ناکامی");
     } finally {
       setLoading(false);
     }
@@ -147,15 +146,17 @@ export function AllContentList() {
       // If rejected, trash from Google Drive if applicable
       if (newStatus === 'rejected') {
         const item = content.find(c => c.id === id);
-        if (item?.file_url?.startsWith('google-drive://')) {
+        if (item?.file_url?.startsWith('ia://')) {
+          await deleteFromInternetArchive(item.file_url);
+        } else if (item?.file_url?.startsWith('google-drive://')) {
           await deleteFromGoogleDrive(item.file_url);
         }
       }
 
-      toast.success(t('common.success'));
+      toast.success("کامیاب");
     } catch (error: any) {
       console.error('Error updating status:', error);
-      toast.error(t('dashboard.roleUpdateFailed'));
+      toast.error("کردار تبدیل کرنے میں ناکامی");
     } finally {
       setActionLoading(null);
     }
@@ -189,24 +190,24 @@ export function AllContentList() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-lg font-semibold">{t('dashboard.allContent')}</h2>
+        <h2 className="text-lg font-semibold">{"تمام مواد"}</h2>
         <div className="flex gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="gradient-primary">
                 <Plus className="mr-2 h-4 w-4" />
-                {t('dashboard.upload.title')}
+                {"نیا مواد شامل کریں"}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => { setUploadType('audio'); setIsUploadOpen(true); }}>
-                {t('nav.audio')}
+                {"آڈیو"}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => { setUploadType('book'); setIsUploadOpen(true); }}>
-                {t('nav.books')}
+                {"کتب"}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => { setUploadType('video'); setIsUploadOpen(true); }}>
-                {t('nav.video')}
+                {"ویڈیو"}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -215,7 +216,7 @@ export function AllContentList() {
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
-                  {t('dashboard.upload.title')} - {t(`nav.${uploadType === 'book' ? 'books' : uploadType}`)}
+                  {"نیا مواد شامل کریں"} - {(uploadType === "book" ? "کتب" : uploadType === "audio" ? "آڈیو" : "ویڈیو")}
                 </DialogTitle>
               </DialogHeader>
 
@@ -247,7 +248,7 @@ export function AllContentList() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder={t('common.search')}
+            placeholder={"تلاش"}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -255,29 +256,29 @@ export function AllContentList() {
         </div>
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
           <SelectTrigger className="w-full sm:w-36">
-            <SelectValue placeholder={t('common.filter')} />
+            <SelectValue placeholder={"فلٹر"} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t('dashboard.myContent.allStatus')}</SelectItem>
-            <SelectItem value="approved">{t('dashboard.published')}</SelectItem>
-            <SelectItem value="rejected">{t('dashboard.unpublishedContent')}</SelectItem>
+            <SelectItem value="all">{"تمام حالات"}</SelectItem>
+            <SelectItem value="approved">{"شائع شدہ"}</SelectItem>
+            <SelectItem value="rejected">{"غیر شائع شدہ"}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as any)}>
           <SelectTrigger className="w-full sm:w-36">
-            <SelectValue placeholder={t('dashboard.type')} />
+            <SelectValue placeholder={"قسم"} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t('common.all')}</SelectItem>
-            <SelectItem value="book">{t('dashboard.books')}</SelectItem>
-            <SelectItem value="audio">{t('dashboard.audio')}</SelectItem>
-            <SelectItem value="video">{t('dashboard.video')}</SelectItem>
+            <SelectItem value="all">{"تمام"}</SelectItem>
+            <SelectItem value="book">{"کتب"}</SelectItem>
+            <SelectItem value="audio">{"آڈیو"}</SelectItem>
+            <SelectItem value="video">{"ویڈیو"}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <p className="text-sm text-muted-foreground">
-        {t('dashboard.myContent.itemsCount', { count: filteredContent.length, total: content.length })}
+        {`${content.length} میں سے ${filteredContent.length} اشیاء دکھائی جا رہی ہیں`}
       </p>
 
       {/* Content List */}
@@ -298,9 +299,9 @@ export function AllContentList() {
                     <p className="font-medium text-foreground truncate">{item.title}</p>
                     <p className="text-xs text-muted-foreground">
                       {item.type === 'audio'
-                        ? (item.speaker || t('dashboard.taxonomyManagement.types.speaker', { defaultValue: 'Speaker' }))
-                        : (item.author || t('common.noAuthor'))}
-                      • {t(`common.languages.${item.language?.toLowerCase().trim() || 'en'}`, { defaultValue: item.language })}
+                        ? (item.speaker || "مقرر")
+                        : (item.author || "نامعلوم مصنف")}
+                      • {item.language}
                     </p>
                   </div>
                 </div>
@@ -312,7 +313,7 @@ export function AllContentList() {
                   </Badge>
 
                   {(item.signed_file_url || item.file_url) && (
-                    <Button variant="ghost" size="icon" asChild title={t('dashboard.myContent.viewFile')}>
+                    <Button variant="ghost" size="icon" asChild title={"فائل دیکھیں"}>
                       <a href={resolveExternalUrl(item.signed_file_url || item.file_url)} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="h-4 w-4" />
                       </a>
@@ -323,7 +324,7 @@ export function AllContentList() {
                     variant="ghost"
                     size="icon"
                     onClick={() => setEditingItem(item)}
-                    title={t('common.edit')}
+                    title={"ترمیم"}
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -341,31 +342,31 @@ export function AllContentList() {
                       )}
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="approved">{t('dashboard.published')}</SelectItem>
-                      <SelectItem value="rejected">{t('dashboard.unpublishedContent')}</SelectItem>
+                      <SelectItem value="approved">{"شائع شدہ"}</SelectItem>
+                      <SelectItem value="rejected">{"غیر شائع شدہ"}</SelectItem>
                     </SelectContent>
                   </Select>
 
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" title={t('common.delete')}>
+                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" title={"حذف کریں"}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>{t('common.delete')}</AlertDialogTitle>
+                        <AlertDialogTitle>{"حذف کریں"}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          {t('common.confirmDelete', { title: item.title })}
+                          {`کیا آپ واقعی "${item.title}" کو حذف کرنا چاہتے ہیں؟`}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                        <AlertDialogCancel>{"منسوخ"}</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => handleDelete(item.id)}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
-                          {t('common.delete')}
+                          {"حذف کریں"}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -378,7 +379,7 @@ export function AllContentList() {
 
         {filteredContent.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
-            <p>{t('common.noData')}</p>
+            <p>{"کوئی ڈیٹا دستیاب نہیں ہے"}</p>
           </div>
         )}
       </div>

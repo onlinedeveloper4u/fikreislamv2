@@ -9,8 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, CheckCircle, Lock, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "@/assets/logo.png";
-import { useTranslation } from "react-i18next";
-
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -18,17 +16,15 @@ const ResetPassword = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { t } = useTranslation();
-
-  useEffect(() => {
+useEffect(() => {
     const checkSession = async () => {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         toast({
-          title: t("resetPassword.invalidLink"),
-          description: t("resetPassword.invalidLinkDesc"),
+          title: "غلط یا ختم شدہ لنک",
+          description: "براہ کرم نیا پاس ورڈ تبدیلی کا لنک حاصل کریں۔",
           variant: "destructive",
         });
         navigate("/forgot-password");
@@ -42,8 +38,8 @@ const ResetPassword = () => {
 
     if (!password || !confirmPassword) {
       toast({
-        title: t("resetPassword.missingFields"),
-        description: t("resetPassword.missingFieldsDesc"),
+        title: "خالی خانے",
+        description: "براہ کرم تمام خانے پُر کریں",
         variant: "destructive",
       });
       return;
@@ -51,8 +47,8 @@ const ResetPassword = () => {
 
     if (password !== confirmPassword) {
       toast({
-        title: t("resetPassword.passwordsDontMatch"),
-        description: t("resetPassword.passwordsDontMatchDesc"),
+        title: "پاس ورڈ مختلف ہیں",
+        description: "براہ کرم یقینی بنائیں کہ دونوں پاس ورڈ ایک جیسے ہیں",
         variant: "destructive",
       });
       return;
@@ -60,8 +56,8 @@ const ResetPassword = () => {
 
     if (password.length < 6) {
       toast({
-        title: t("resetPassword.passwordTooShort"),
-        description: t("resetPassword.passwordTooShortDesc"),
+        title: "پاس ورڈ بہت چھوٹا ہے",
+        description: "پاس ورڈ کم از کم 6 حروف کا ہونا چاہیے",
         variant: "destructive",
       });
       return;
@@ -73,7 +69,7 @@ const ResetPassword = () => {
 
     if (error) {
       toast({
-        title: t("resetPassword.error"),
+        title: "غلطی",
         description: error.message,
         variant: "destructive",
       });
@@ -122,7 +118,7 @@ const ResetPassword = () => {
               >
                 <img
                   src={logo}
-                  alt={t("common.brand")}
+                  alt={"فکر اسلام"}
                   className="w-32 h-32 md:w-40 md:h-40 object-contain mx-auto drop-shadow-2xl opacity-90"
                 />
               </motion.div>
@@ -132,7 +128,7 @@ const ResetPassword = () => {
                 transition={{ delay: 0.3 }}
                 className="font-display text-4xl font-bold text-foreground mb-4 tracking-tight"
               >
-                {isSuccess ? t("resetPassword.passwordUpdated") : t("resetPassword.setNewPassword")}
+                {isSuccess ? "پاس ورڈ تبدیل ہو گیا" : "نیا پاس ورڈ مقرر کریں"}
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
@@ -141,8 +137,8 @@ const ResetPassword = () => {
                 className="text-muted-foreground text-lg opacity-80"
               >
                 {isSuccess
-                  ? t("resetPassword.passwordUpdatedDesc")
-                  : t("resetPassword.enterNewPassword")
+                  ? "آپ کا پاس ورڈ کامیابی سے تبدیل ہو گیا ہے"
+                  : "نیچے اپنا نیا پاس ورڈ درج کریں"
                 }
               </motion.p>
             </div>
@@ -164,13 +160,13 @@ const ResetPassword = () => {
                     <CheckCircle className="w-12 h-12 text-green-500" />
                   </motion.div>
                   <p className="text-lg text-muted-foreground px-4 leading-relaxed">
-                    {t("resetPassword.redirecting")}
+                    {"چند لمحوں میں ہوم پیج پر منتقل ہو رہے ہیں..."}
                   </p>
                   <Button
                     onClick={() => navigate("/")}
                     className="w-full h-14 rounded-2xl gradient-primary border-none shadow-xl shadow-primary/20 text-lg font-bold"
                   >
-                    {t("resetPassword.goToHomepage")}
+                    {"ابھی ہوم پیج پر جائیں"}
                   </Button>
                 </motion.div>
               ) : (
@@ -184,7 +180,7 @@ const ResetPassword = () => {
                 >
                   <div className="space-y-6">
                     <div className="space-y-3">
-                      <Label htmlFor="password" className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">{t("resetPassword.newPassword")}</Label>
+                      <Label htmlFor="password" className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">{"نیا پاس ورڈ"}</Label>
                       <div className="relative group">
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input
@@ -200,7 +196,7 @@ const ResetPassword = () => {
                     </div>
 
                     <div className="space-y-3">
-                      <Label htmlFor="confirmPassword" className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">{t("resetPassword.confirmNewPassword")}</Label>
+                      <Label htmlFor="confirmPassword" className="text-xs font-bold uppercase tracking-[0.2em] opacity-60 ml-1">{"نئے پاس ورڈ کی تصدیق"}</Label>
                       <div className="relative group">
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input
@@ -224,11 +220,11 @@ const ResetPassword = () => {
                     {isLoading ? (
                       <div className="flex items-center gap-3">
                         <Loader2 className="h-6 w-6 animate-spin" />
-                        <span>{t("resetPassword.updating")}</span>
+                        <span>{"تبدیل ہو رہا ہے..."}</span>
                       </div>
                     ) : (
                       <div className="flex items-center justify-center gap-3">
-                        <span>{t("resetPassword.updatePassword")}</span>
+                        <span>{"پاس ورڈ تبدیل کریں"}</span>
                         <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform rotate-180" />
                       </div>
                     )}

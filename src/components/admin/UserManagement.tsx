@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { useTranslation } from 'react-i18next';
 import { User, Shield, Upload, Loader2, Users, Mail } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -23,11 +22,9 @@ export function UserManagement() {
   const [users, setUsers] = useState<UserDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const { t } = useTranslation();
-
-  const roleConfig: Record<AppRole, { icon: React.ElementType; color: string; label: string }> = {
-    admin: { icon: Shield, color: 'bg-red-500/10 text-red-600', label: t('dashboard.admin') },
-    user: { icon: User, color: 'bg-gray-500/10 text-gray-600', label: t('dashboard.user') },
+const roleConfig: Record<AppRole, { icon: React.ElementType; color: string; label: string }> = {
+    admin: { icon: Shield, color: 'bg-red-500/10 text-red-600', label: "منتظم" },
+    user: { icon: User, color: 'bg-gray-500/10 text-gray-600', label: "صارف" },
   };
 
   useEffect(() => {
@@ -43,7 +40,7 @@ export function UserManagement() {
     } catch (error: any) {
       console.error('Error fetching users via RPC:', error);
       const errorMessage = error.message || 'Unknown error';
-      toast.error(`${t('dashboard.loadUsersFailed')}: ${errorMessage}`);
+      toast.error(`${"صارفین لوڈ کرنے میں ناکامی"}: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -62,10 +59,10 @@ export function UserManagement() {
       setUsers(prev => prev.map(u =>
         u.id === userId ? { ...u, user_role: newRole } : u
       ));
-      toast.success(t('dashboard.roleUpdated'));
+      toast.success("کردار کامیابی سے تبدیل ہو گیا");
     } catch (error: any) {
       console.error('Error updating role:', error);
-      toast.error(t('dashboard.roleUpdateFailed'));
+      toast.error("کردار تبدیل کرنے میں ناکامی");
     } finally {
       setUpdatingId(null);
     }
@@ -84,9 +81,9 @@ export function UserManagement() {
       <Card className="border-border/50 bg-card/50">
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
           <Users className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium text-foreground">{t('dashboard.noUsers')}</h3>
+          <h3 className="text-lg font-medium text-foreground">{"کوئی صارف نہیں ملا"}</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            {t('dashboard.noUsersDesc')}
+            {"نظام میں کوئی صارف اندراج شدہ نہیں ہے۔"}
           </p>
         </CardContent>
       </Card>
@@ -97,7 +94,7 @@ export function UserManagement() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {t('dashboard.registeredUsers', { count: users.length })}
+          {`${users.length} اندراج شدہ صارف`}
         </p>
       </div>
 
@@ -122,7 +119,7 @@ export function UserManagement() {
                         <Mail className="h-3 w-3" /> {user.email}
                       </p>
                       <p className="text-[10px] text-muted-foreground opacity-70">
-                        {t('dashboard.joined', { date: new Date(user.created_at).toLocaleDateString() })}
+                        {`شامل ہوئے ${new Date(user.created_at).toLocaleDateString()}`}
                       </p>
                     </div>
                   </div>
@@ -147,8 +144,8 @@ export function UserManagement() {
                       )}
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="user">{t('dashboard.user')}</SelectItem>
-                      <SelectItem value="admin">{t('dashboard.admin')}</SelectItem>
+                      <SelectItem value="user">{"صارف"}</SelectItem>
+                      <SelectItem value="admin">{"منتظم"}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

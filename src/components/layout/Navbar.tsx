@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Book, Headphones, Video, Menu, X, LogOut, User, Heart, LayoutDashboard, HelpCircle, Settings } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTranslation } from "react-i18next";
 import logo from "@/assets/logo.png";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -18,8 +17,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { user, role, signOut, loading } = useAuth();
-  const { t } = useTranslation();
-  const navigate = useNavigate();
+const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,10 +33,10 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { name: t("nav.books"), href: "/books", icon: Book },
-    { name: t("nav.audio"), href: "/audio", icon: Headphones },
-    { name: t("nav.video"), href: "/video", icon: Video },
-    { name: t("nav.qa"), href: "/qa", icon: HelpCircle },
+    { name: "کتب", href: "/books", icon: Book },
+    { name: "آڈیو", href: "/audio", icon: Headphones },
+    { name: "ویڈیو", href: "/video", icon: Video },
+    { name: "سوال و جواب", href: "/qa", icon: HelpCircle },
   ];
 
   const getRoleBadge = () => {
@@ -49,7 +47,7 @@ const Navbar = () => {
     };
     return (
       <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${colors[role]}`}>
-        {t(`dashboard.${role}`)}
+        {(role === "admin" ? "منتظم" : "صارف")}
       </span>
     );
   };
@@ -65,9 +63,9 @@ const Navbar = () => {
       <nav className="container mx-auto px-4 h-full flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt={t("common.brand")} className="w-16 h-16 object-contain" />
+          <img src={logo} alt={"فکر اسلام"} className="w-16 h-16 object-contain" />
           <span className="font-display text-2xl font-bold text-foreground">
-            {t("common.brand")}
+            {"فکر اسلام"}
           </span>
         </Link>
 
@@ -117,37 +115,37 @@ const Navbar = () => {
                 <DropdownMenuItem asChild className="cursor-pointer">
                   <Link to="/library">
                     <Heart className="w-4 h-4 mr-2" />
-                    {t("nav.library")}
+                    {"میری لائبریری"}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="cursor-pointer">
                   <Link to="/settings">
                     <Settings className="w-4 h-4 mr-2" />
-                    {t("nav.settings")}
+                    {"ترتیبات"}
                   </Link>
                 </DropdownMenuItem>
                 {role === 'admin' && (
                   <DropdownMenuItem asChild className="cursor-pointer">
                     <Link to="/dashboard">
                       <LayoutDashboard className="w-4 h-4 mr-2" />
-                      {t("nav.dashboard")}
+                      {"ڈیش بورڈ"}
                     </Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive cursor-pointer">
                   <LogOut className="w-4 h-4 mr-2" />
-                  {t("nav.signOut")}
+                  {"باہر نکلیں"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <>
               <Button variant="ghost" asChild>
-                <Link to="/login">{t("nav.signIn")}</Link>
+                <Link to="/login">{"داخل ہوں"}</Link>
               </Button>
               <Button variant="hero" asChild>
-                <Link to="/register">{t("nav.getStarted")}</Link>
+                <Link to="/register">{"شروع کریں"}</Link>
               </Button>
             </>
           )}
@@ -196,17 +194,17 @@ const Navbar = () => {
                   </div>
                   <Button variant="outline" onClick={handleSignOut}>
                     <LogOut className="w-4 h-4 mr-2" />
-                    {t("nav.signOut")}
+                    {"باہر نکلیں"}
                   </Button>
 
                 </>
               ) : (
                 <>
                   <Button variant="outline" asChild>
-                    <Link to="/login">{t("nav.signIn")}</Link>
+                    <Link to="/login">{"داخل ہوں"}</Link>
                   </Button>
                   <Button variant="hero" asChild>
-                    <Link to="/register">{t("nav.getStarted")}</Link>
+                    <Link to="/register">{"شروع کریں"}</Link>
                   </Button>
 
                 </>

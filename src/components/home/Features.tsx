@@ -1,50 +1,47 @@
 import { Search, Download, Heart, Users, Shield, Globe, BookOpen, MessageCircle } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import { motion, Variants } from "framer-motion";
 
 const Features = () => {
-  const { t } = useTranslation();
-
-  const features = [
+const features = [
     {
       icon: BookOpen,
-      title: t("home.features.authentic.title"),
-      description: t("home.features.authentic.desc"),
+      title: "مستند مواد",
+      description: "قابل اعتماد علماء اور اداروں سے احتیاط سے منتخب کردہ اسلامی کتب، خطبات اور وسائل",
     },
     {
       icon: Search,
-      title: t("home.features.smartSearch.title"),
-      description: t("home.features.smartSearch.desc"),
+      title: "ذہین تلاش",
+      description: "طاقتور تلاش اور فلٹرنگ کے اختیارات کے ساتھ وہی تلاش کریں جس کی آپ کو ضرورت ہے",
     },
     {
       icon: Heart,
-      title: t("home.features.library.title"),
-      description: t("home.features.library.desc"),
+      title: "ذاتی کتب خانہ",
+      description: "اپنے سیکھنے کے سفر کو منظم کرنے کے لیے پسندیدہ کو محفوظ کریں اور مرضی کی فہرستیں بنائیں",
     },
     {
       icon: Users,
-      title: t("home.features.community.title"),
-      description: t("home.features.community.desc"),
+      title: "کمیونٹی پر مبنی",
+      description: "دنیا بھر کے علماء اور معاونین مستند اسلامی علم شیئر کرتے ہیں",
     },
     {
       icon: Shield,
-      title: t("home.features.quality.title"),
-      description: t("home.features.quality.desc"),
+      title: "معیار کی ضمانت",
+      description: "انتظامی ٹیم کے ذریعہ مواد کا فوری جائزہ لیا جاتا ہے اور شائع کیا جاتا ہے",
     },
     {
       icon: Globe,
-      title: t("home.features.multilingual.title"),
-      description: t("home.features.multilingual.desc"),
+      title: "کثیر لسانی",
+      description: "عربی، اردو اور بہت سی زبانوں میں دستیاب مواد",
     },
     {
       icon: Download,
-      title: t("home.features.offline.title"),
-      description: t("home.features.offline.desc"),
+      title: "بغیر انٹرنیٹ رسائی",
+      description: "کسی بھی وقت، کہیں بھی بغیر انٹرنیٹ پڑھنے اور سننے کے لیے مواد حاصل کریں",
     },
     {
       icon: MessageCircle,
-      title: t("home.features.qa.title"),
-      description: t("home.features.qa.desc"),
+      title: "سوال و جواب",
+      description: "سوالات پوچھیں اور باخبر کمیونٹی ممبران سے جوابات حاصل کریں",
     },
   ];
 
@@ -85,7 +82,7 @@ const Features = () => {
             viewport={{ once: true }}
             className="inline-block px-4 py-1.5 rounded-full glass border border-primary/20 text-primary text-sm font-medium mb-4"
           >
-            {t("home.featuresBadge")}
+            {"پلیٹ فارم کی خصوصیات"}
           </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -94,7 +91,7 @@ const Features = () => {
             transition={{ delay: 0.1 }}
             className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6"
           >
-            {t("home.featuresTitle")}
+            {"آپ کی روحانی ترقی کے لیے سب کچھ"}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -103,7 +100,7 @@ const Features = () => {
             transition={{ delay: 0.2 }}
             className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed"
           >
-            {t("home.featuresSubtitle")}
+            {"ایک جامع پلیٹ فارم جو پوری دنیا کے مسلمانوں کے لیے مستند اسلامی علم تک رسائی کو آسان بناتا ہے"}
           </motion.p>
         </div>
 

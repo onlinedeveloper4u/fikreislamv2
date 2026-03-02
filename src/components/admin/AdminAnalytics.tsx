@@ -3,7 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useTranslation } from 'react-i18next';
 import {
   BarChart3, Eye, Download, Play, FileText, Music, Video,
   Users, TrendingUp, Loader2, Calendar
@@ -27,9 +26,7 @@ export function AdminAnalytics() {
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
-  const { t } = useTranslation();
-
-  useEffect(() => {
+useEffect(() => {
     fetchAnalytics();
   }, [timeRange]);
 
@@ -139,16 +136,16 @@ export function AdminAnalytics() {
   if (!analytics) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        {t('dashboard.unableLoadAnalytics')}
+        {"تجزیات لوڈ کرنے میں ناکامی"}
       </div>
     );
   }
 
   const statCards = [
-    { label: t('dashboard.totalViews'), value: analytics.totalViews, icon: Eye, color: 'text-blue-500' },
-    { label: t('dashboard.downloads'), value: analytics.totalDownloads, icon: Download, color: 'text-green-500' },
-    { label: t('dashboard.plays'), value: analytics.totalPlays, icon: Play, color: 'text-purple-500' },
-    { label: t('dashboard.content'), value: analytics.totalContent, icon: FileText, color: 'text-primary' },
+    { label: "کل مناظر", value: analytics.totalViews, icon: Eye, color: 'text-blue-500' },
+    { label: "حاصل شدہ", value: analytics.totalDownloads, icon: Download, color: 'text-green-500' },
+    { label: "سنے گئے", value: analytics.totalPlays, icon: Play, color: 'text-purple-500' },
+    { label: "مواد", value: analytics.totalContent, icon: FileText, color: 'text-primary' },
   ];
 
   const typeIcons = {
@@ -163,7 +160,7 @@ export function AdminAnalytics() {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold flex items-center gap-2">
           <BarChart3 className="h-5 w-5" />
-          {t('dashboard.analyticsOverview')}
+          {"تجزیات کا خلاصہ"}
         </h2>
         <Select value={timeRange} onValueChange={(v: TimeRange) => setTimeRange(v)}>
           <SelectTrigger className="w-32 md:w-44">
@@ -171,10 +168,10 @@ export function AdminAnalytics() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="7d">{t('dashboard.last7Days')}</SelectItem>
-            <SelectItem value="30d">{t('dashboard.last30Days')}</SelectItem>
-            <SelectItem value="90d">{t('dashboard.last90Days')}</SelectItem>
-            <SelectItem value="all">{t('dashboard.allTime')}</SelectItem>
+            <SelectItem value="7d">{"گزشتہ 7 دن"}</SelectItem>
+            <SelectItem value="30d">{"گزشتہ 30 دن"}</SelectItem>
+            <SelectItem value="90d">{"گزشتہ 90 دن"}</SelectItem>
+            <SelectItem value="all">{"تمام وقت"}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -205,29 +202,29 @@ export function AdminAnalytics() {
         {/* Content Breakdown */}
         <Card className="border-border/50 bg-card/50 backdrop-blur">
           <CardHeader>
-            <CardTitle className="text-lg">{t('dashboard.contentBreakdown')}</CardTitle>
-            <CardDescription>{t('dashboard.byType')}</CardDescription>
+            <CardTitle className="text-lg">{"مواد کی تفصیل"}</CardTitle>
+            <CardDescription>{"قسم کے لحاظ سے"}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4 text-blue-500" />
-                  <span>{t('dashboard.books')}</span>
+                  <span>{"کتب"}</span>
                 </div>
                 <Badge variant="secondary">{analytics.bookCount}</Badge>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Music className="h-4 w-4 text-green-500" />
-                  <span>{t('dashboard.audio')}</span>
+                  <span>{"آڈیو"}</span>
                 </div>
                 <Badge variant="secondary">{analytics.audioCount}</Badge>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Video className="h-4 w-4 text-purple-500" />
-                  <span>{t('dashboard.video')}</span>
+                  <span>{"ویڈیو"}</span>
                 </div>
                 <Badge variant="secondary">{analytics.videoCount}</Badge>
               </div>
@@ -240,14 +237,14 @@ export function AdminAnalytics() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
-              {t('dashboard.topContent')}
+              {"مقبول مواد"}
             </CardTitle>
-            <CardDescription>{t('dashboard.mostViewed')}</CardDescription>
+            <CardDescription>{"سب سے زیادہ دیکھا جانے والا مواد"}</CardDescription>
           </CardHeader>
           <CardContent>
             {analytics.topContent.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4">
-                {t('dashboard.noActivity')}
+                {"ابھی تک کوئی ڈیٹا دستیاب نہیں ہے"}
               </p>
             ) : (
               <div className="space-y-3">
@@ -261,7 +258,7 @@ export function AdminAnalytics() {
                       <TypeIcon className="h-4 w-4 text-muted-foreground" />
                       <span className="flex-1 truncate text-sm">{item.title}</span>
                       <Badge variant="outline" className="text-xs">
-                        {t('dashboard.viewsCount', { count: item.views })}
+                        {`${item.views} مناظر`}
                       </Badge>
                     </div>
                   );

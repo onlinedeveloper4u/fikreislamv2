@@ -11,16 +11,13 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, User, Lock, ArrowLeft, Settings as SettingsIcon } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 
 const Settings = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t } = useTranslation();
-
-  const [fullName, setFullName] = useState("");
+const [fullName, setFullName] = useState("");
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
@@ -67,14 +64,14 @@ const Settings = () => {
 
     if (error) {
       toast({
-        title: t('qa.form.errorTitle'),
+        title: "غلطی",
         description: error.message,
         variant: "destructive",
       });
     } else {
       toast({
-        title: t('settings.profile.success'),
-        description: t('settings.profile.successDesc'),
+        title: "کامیاب!",
+        description: "پروفائل کامیابی سے تبدیل ہو گیا ہے",
       });
     }
 
@@ -86,8 +83,8 @@ const Settings = () => {
 
     if (!newPassword || !confirmPassword) {
       toast({
-        title: t('settings.password.errorMissing'),
-        description: t('settings.password.errorMissingDesc'),
+        title: "خالی خانے",
+        description: "براہ کرم تمام خانے پُر کریں",
         variant: "destructive",
       });
       return;
@@ -95,8 +92,8 @@ const Settings = () => {
 
     if (newPassword !== confirmPassword) {
       toast({
-        title: t('settings.password.errorMismatch'),
-        description: t('settings.password.errorMismatchDesc'),
+        title: "پاس ورڈ مختلف ہیں",
+        description: "براہ کرم یقینی بنائیں کہ دونوں پاس ورڈ ایک جیسے ہیں",
         variant: "destructive",
       });
       return;
@@ -104,8 +101,8 @@ const Settings = () => {
 
     if (newPassword.length < 6) {
       toast({
-        title: t('settings.password.errorShort'),
-        description: t('settings.password.errorShortDesc'),
+        title: "پاس ورڈ بہت چھوٹا ہے",
+        description: "پاس ورڈ کم از کم 6 حروف کا ہونا چاہیے",
         variant: "destructive",
       });
       return;
@@ -117,14 +114,14 @@ const Settings = () => {
 
     if (error) {
       toast({
-        title: t('qa.form.errorTitle'),
+        title: "غلطی",
         description: error.message,
         variant: "destructive",
       });
     } else {
       toast({
-        title: t('settings.password.success'),
-        description: t('settings.password.successDesc'),
+        title: "کامیاب!",
+        description: "پاس ورڈ کامیابی سے تبدیل ہو گیا ہے",
       });
       setNewPassword("");
       setConfirmPassword("");
@@ -138,7 +135,7 @@ const Settings = () => {
       <Layout>
         <div className="min-h-[80vh] flex flex-col items-center justify-center gap-4">
           <Loader2 className="w-10 h-10 animate-spin text-primary" />
-          <p className="text-muted-foreground animate-pulse font-medium">{t('common.loading')}</p>
+          <p className="text-muted-foreground animate-pulse font-medium">{"لوڈ ہو رہا ہے..."}</p>
         </div>
       </Layout>
     );
@@ -159,7 +156,7 @@ const Settings = () => {
             className="group inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-8 transition-all"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-semibold uppercase tracking-wider text-[11px]">{t('settings.backToHome')}</span>
+            <span className="font-semibold uppercase tracking-wider text-[11px]">{"واپس ہوم پیج"}</span>
           </Link>
         </motion.div>
 
@@ -174,7 +171,7 @@ const Settings = () => {
               <SettingsIcon className="w-7 h-7 text-primary-foreground" />
             </div>
             <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground tracking-tight">
-              {t('settings.title')}
+              {"ترتیبات"}
             </h1>
           </div>
           <div className="h-1.5 w-32 bg-primary/20 rounded-full mt-8" />
@@ -192,16 +189,16 @@ const Settings = () => {
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                   <User className="w-5 h-5" />
                 </div>
-                <CardTitle className="text-2xl font-display font-bold leading-tight">{t('settings.profile.title')}</CardTitle>
+                <CardTitle className="text-2xl font-display font-bold leading-tight">{"پروفائل کی معلومات"}</CardTitle>
               </div>
               <CardDescription className="text-base opacity-70">
-                {t('settings.profile.desc')}
+                {"اپنے اکاؤنٹ کی معلومات تبدیل کریں"}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-8 pt-6">
               <form onSubmit={handleUpdateProfile} className="space-y-8">
                 <div className="space-y-3">
-                  <Label htmlFor="email" className="text-sm font-bold uppercase tracking-widest opacity-60 ml-1">{t('settings.profile.email')}</Label>
+                  <Label htmlFor="email" className="text-sm font-bold uppercase tracking-widest opacity-60 ml-1">{"ای میل"}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -210,16 +207,16 @@ const Settings = () => {
                     className="h-14 bg-muted/40 border-border/40 rounded-2xl text-lg font-medium opacity-60 cursor-not-allowed"
                   />
                   <p className="text-xs text-muted-foreground/60 italic ml-1">
-                    {t('settings.profile.emailDisabled')}
+                    {"ای میل تبدیل نہیں کیا جا سکتا"}
                   </p>
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="fullName" className="text-sm font-bold uppercase tracking-widest opacity-60 ml-1">{t('settings.profile.fullName')}</Label>
+                  <Label htmlFor="fullName" className="text-sm font-bold uppercase tracking-widest opacity-60 ml-1">{"پورا نام"}</Label>
                   <Input
                     id="fullName"
                     type="text"
-                    placeholder={t('settings.profile.fullNamePlaceholder')}
+                    placeholder={"اپنا پورا نام درج کریں"}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     disabled={isLoadingProfile || isSavingProfile}
@@ -231,10 +228,10 @@ const Settings = () => {
                   {isSavingProfile ? (
                     <>
                       <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                      {t('settings.profile.saving')}
+                      {"محفوظ ہو رہا ہے..."}
                     </>
                   ) : (
-                    t('settings.profile.save')
+                    "محفوظ کریں"
                   )}
                 </Button>
               </form>
@@ -247,22 +244,22 @@ const Settings = () => {
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                   <Lock className="w-5 h-5" />
                 </div>
-                <CardTitle className="text-2xl font-display font-bold leading-tight">{t('settings.password.title')}</CardTitle>
+                <CardTitle className="text-2xl font-display font-bold leading-tight">{"پاس ورڈ تبدیل کریں"}</CardTitle>
               </div>
               <CardDescription className="text-base opacity-70">
-                {t('settings.password.desc')}
+                {"اپنے اکاؤنٹ کا پاس ورڈ تبدیل کریں"}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-8 pt-6">
               <form onSubmit={handleChangePassword} className="space-y-8">
                 <div className="space-y-3">
-                  <Label htmlFor="newPassword" title={t('settings.password.newPassword')} className="text-sm font-bold uppercase tracking-widest opacity-60 ml-1">
-                    {t('settings.password.newPassword')}
+                  <Label htmlFor="newPassword" title={"نیا پاس ورڈ"} className="text-sm font-bold uppercase tracking-widest opacity-60 ml-1">
+                    {"نیا پاس ورڈ"}
                   </Label>
                   <Input
                     id="newPassword"
                     type="password"
-                    placeholder={t('settings.password.confirmPlaceholder')}
+                    placeholder={"پاس ورڈ درج کریں"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     disabled={isChangingPassword}
@@ -271,13 +268,13 @@ const Settings = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="confirmNewPassword" title={t('settings.password.confirmPassword')} className="text-sm font-bold uppercase tracking-widest opacity-60 ml-1">
-                    {t('settings.password.confirmPassword')}
+                  <Label htmlFor="confirmNewPassword" title={"پاس ورڈ کی تصدیق"} className="text-sm font-bold uppercase tracking-widest opacity-60 ml-1">
+                    {"پاس ورڈ کی تصدیق"}
                   </Label>
                   <Input
                     id="confirmNewPassword"
                     type="password"
-                    placeholder={t('settings.password.confirmPlaceholder')}
+                    placeholder={"پاس ورڈ درج کریں"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     disabled={isChangingPassword}
@@ -289,10 +286,10 @@ const Settings = () => {
                   {isChangingPassword ? (
                     <>
                       <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                      {t('settings.password.updating')}
+                      {"تبدیل ہو رہا ہے..."}
                     </>
                   ) : (
-                    t('settings.password.update')
+                    "پاس ورڈ تبدیل کریں"
                   )}
                 </Button>
               </form>
