@@ -1,0 +1,166 @@
+---
+// src/modules/auth/components/LoginForm.astro
+import Icon from '../../../components/shared/Icon.astro';
+---
+
+<div class="w-full max-w-md mx-auto p-4 animate-fade-in-up">
+    <div class="bg-white rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] p-10 md:p-14 text-center relative overflow-hidden">
+        {/* Logo Section */}
+        <div class="mb-8 relative z-10 transition-transform duration-500 hover:scale-110">
+            <div class="w-28 h-28 mx-auto rounded-full overflow-hidden">
+                <img src="/logo.png" alt="فکر اسلام لوگو" class="w-full h-full object-contain" />
+            </div>
+            <h1 class="text-3xl font-black text-emerald-800 mt-6 font-urdu">فکرِ اسلام</h1>
+            <p class="text-slate-400 font-bold text-sm mt-1 font-urdu opacity-80">ایڈمن لاگ ان پورٹل</p>
+        </div>
+
+        <form id="login-form" class="space-y-8 relative z-10 text-right" dir="rtl">
+            <div class="space-y-6">
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-500 mr-2 font-urdu">ای میل</label>
+                    <div class="relative group">
+                        <input 
+                            type="email" 
+                            name="email"
+                            required
+                            class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-emerald-500 focus:bg-white shadow-sm transition-all outline-none font-bold text-slate-700 pr-14"
+                            placeholder="اپنی ای میل درج کریں"
+                        />
+                        <div class="absolute right-5 top-1/2 -translate-y-1/2 text-emerald-600 group-focus-within:scale-110 transition-transform">
+                            <Icon name="at-sign" size={20} />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-500 mr-2 font-urdu">پاس ورڈ</label>
+                    <div class="relative group">
+                        <input 
+                            type="password" 
+                            id="login-password"
+                            name="password"
+                            required
+                            class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-emerald-500 focus:bg-white shadow-sm transition-all outline-none font-bold text-slate-700 pr-14 pl-12"
+                            placeholder="اپنا پاس ورڈ درج کریں"
+                        />
+                        <div class="absolute right-5 top-1/2 -translate-y-1/2 text-emerald-600 group-focus-within:scale-110 transition-transform">
+                            <Icon name="lock" size={20} />
+                        </div>
+                        <button 
+                            type="button"
+                            id="toggle-password"
+                            class="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-600/50 hover:text-emerald-600 transition-all p-1"
+                        >
+                            <span class="show-pass"><Icon name="eye" size={18} /></span>
+                            <span class="hide-pass hidden"><Icon name="eye-off" size={18} /></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-start">
+                <a href="/forgot-password" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors font-urdu mr-2">پاس ورڈ بھول گئے؟</a>
+            </div>
+
+            <button 
+                type="submit" 
+                id="submit-btn"
+                class="w-full py-5 rounded-2xl bg-[#1a6336] text-white font-black text-xl shadow-lg shadow-emerald-900/10 hover:bg-[#14532d] hover:-translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-4 group"
+            >
+                <span id="btn-text" class="font-urdu">داخل ہوں</span>
+                <div id="btn-icon" class="transition-transform group-hover:translate-x-1">
+                    <Icon name="logout" size={24} />
+                </div>
+                <div id="btn-loader" class="hidden">
+                     <div class="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                </div>
+            </button>
+        </form>
+
+        <div class="mt-10 text-slate-400 text-[10px] font-bold font-urdu opacity-60">
+            © 2026 فکر اسلام۔ جملہ حقوق محفوظ ہیں۔
+        </div>
+
+        {/* Decorative elements */}
+        <div class="absolute -bottom-20 -left-20 w-40 h-40 bg-emerald-50 rounded-full blur-3xl -z-10"></div>
+    </div>
+</div>
+
+<script>
+    const { signIn } = await import("auth-astro/client");
+    const form = document.getElementById('login-form') as HTMLFormElement;
+    const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+    const btnText = document.getElementById('btn-text');
+    const btnIcon = document.getElementById('btn-icon');
+    const btnLoader = document.getElementById('btn-loader');
+
+    // Check for error on page load (from Auth.js redirection)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('error')) {
+        const error = urlParams.get('error');
+        console.log("Auth error detected on load:", error);
+        // @ts-ignore
+        if (window.toast) window.toast.show("غلط ای میل یا پاس ورڈ۔", "error");
+    }
+
+    // Password Toggle Logic
+    const toggleBtn = document.getElementById('toggle-password');
+    const passwordInput = document.getElementById('login-password') as HTMLInputElement;
+
+    toggleBtn?.addEventListener('click', () => {
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+        
+        toggleBtn.querySelector('.show-pass')?.classList.toggle('hidden', !isPassword);
+        toggleBtn.querySelector('.hide-pass')?.classList.toggle('hidden', isPassword);
+    });
+
+    form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Loading state
+        btnText?.classList.add('hidden');
+        btnIcon?.classList.add('hidden');
+        btnLoader?.classList.remove('hidden');
+        submitBtn.disabled = true;
+
+        const formData = new FormData(form);
+        const email = formData.get('email') as string;
+        const password = formData.get('password') as string;
+        
+        try {
+            console.log("Attempting sign in for:", email);
+            // @ts-ignore
+            const result = await signIn("credentials", { 
+                email, 
+                password, 
+                callbackUrl: '/admin',
+                redirect: true // Use automatic redirection for reliability
+            });
+
+            // Note: with redirect:true, code below usually doesn't run on success
+            // but we keep it as a fallback or for error handling.
+            if (result && result.error) {
+                console.error("SignIn Error Result:", result.error);
+                // @ts-ignore
+                if (window.toast) window.toast.show("غلط ای میل یا پاس ورڈ۔", "error");
+                
+                // Reset state
+                btnText?.classList.remove('hidden');
+                btnIcon?.classList.remove('hidden');
+                btnLoader?.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        } catch (err) {
+            console.error("Login catch error:", err);
+            // If it's the SyntaxError but cookies are set, the middleware will catch them on next load
+            // @ts-ignore
+            if (window.toast) window.toast.show("سسٹم میں خرابی۔ لیکن شاید آپ لاگ ان ہو چکے ہیں، صفحہ ریفریش کریں۔", "info");
+            
+            btnText?.classList.remove('hidden');
+            btnIcon?.classList.remove('hidden');
+            btnLoader?.classList.add('hidden');
+            submitBtn.disabled = false;
+        }
+    });
+</script>

@@ -1,0 +1,87 @@
+---
+// src/components/shared/Toast.astro
+---
+<div id="toast-container" class="fixed top-24 right-6 z-9999 flex flex-col gap-3 pointer-events-none"></div>
+
+<template id="toast-template">
+    <div class="toast-item glass-card px-6 py-4 flex items-center gap-4 animate-slide-in pointer-events-auto shadow-2xl min-w-[300px] border-r-4 border-emerald-500">
+        <div class="toast-icon text-emerald-500">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="flex-1">
+            <p class="toast-message font-urdu text-sm font-bold text-slate-800 leading-none"></p>
+        </div>
+        <button class="toast-close text-slate-400 hover:text-slate-600">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+        </button>
+    </div>
+</template>
+
+<script is:inline>
+    (function() {
+        class ToastManager {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.container = document.getElementById('toast-container');
+                this.template = document.getElementById('toast-template');
+            }
+
+            show(message, type = 'success', duration = 4000) {
+                // Always try to re-find in case of DOM changes
+                if (!this.container) this.container = document.getElementById('toast-container');
+                if (!this.template) this.template = document.getElementById('toast-template');
+                
+                if (!this.container || !this.template) {
+                    console.warn('Toast elements not found, retrying...');
+                    this.init();
+                }
+                
+                if (!this.container || !this.template) return;
+
+                const toast = this.template.content.cloneNode(true);
+                const item = toast.querySelector('.toast-item');
+                const messageEl = toast.querySelector('.toast-message');
+                const closeBtn = toast.querySelector('.toast-close');
+
+                messageEl.textContent = message;
+
+                if (type === 'error') {
+                    item.classList.add('border-red-500');
+                    const iconContainer = item.querySelector('.toast-icon');
+                    if (iconContainer) {
+                        iconContainer.classList.add('text-red-500');
+                        iconContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>`;
+                    }
+                }
+
+                closeBtn.onclick = () => {
+                    item.classList.add('opacity-0', 'translate-x-full');
+                    setTimeout(() => item.remove(), 300);
+                };
+
+                this.container.appendChild(toast);
+
+                setTimeout(() => {
+                    if (item.parentElement) {
+                        item.classList.add('opacity-0', 'translate-x-full');
+                        setTimeout(() => item.remove(), 300);
+                    }
+                }, duration);
+            }
+        }
+
+        window.toast = new ToastManager();
+        window.showToast = (message, type) => window.toast.show(message, type);
+    })();
+</script>
+
+<style>
+    .toast-item {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        transition: all 0.3s ease;
+    }
+</style>

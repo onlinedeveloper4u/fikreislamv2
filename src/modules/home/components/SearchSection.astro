@@ -1,0 +1,137 @@
+---
+// src/modules/home/components/SearchSection.astro
+import Icon from '../../../components/shared/Icon.astro';
+---
+
+<section class="max-w-7xl mx-auto px-4 -mt-10 relative z-30 font-urdu">
+    <div class="glass-search p-4 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-white/40 flex flex-col md:flex-row items-center gap-4">
+        
+        {/* Search Bar */}
+        <div class="relative flex-1 w-full">
+            <div class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400">
+                <Icon name="search" size={20} />
+            </div>
+            <input 
+                type="text" 
+                id="library-search"
+                placeholder="عنوان، مصنف، یا تفصیل کے ذریعے تلاش کریں..."
+                class="w-full pl-14 pr-6 py-4 rounded-2xl bg-slate-500/5 border border-transparent focus:border-emerald-500/30 focus:bg-white transition-all outline-none text-slate-700 text-right font-bold"
+            />
+        </div>
+
+        {/* Filters & View Toggles */}
+        <div class="flex items-center gap-3 w-full md:w-auto">
+            {/* Filter Button */}
+            <button class="flex items-center gap-3 px-6 py-4 bg-slate-500/5 hover:bg-slate-100 rounded-2xl border border-transparent transition-all group">
+                <Icon name="filter" size={18} class="text-slate-400 group-hover:text-emerald-500" />
+                <span class="text-slate-600 font-bold">تمام</span>
+            </button>
+
+            {/* View Toggles */}
+            <div class="flex items-center bg-slate-500/5 p-1.5 rounded-2xl gap-1">
+                <button 
+                  id="view-list"
+                  class="p-2.5 rounded-xl text-slate-400 hover:text-emerald-500 transition-all view-toggle-btn"
+                  title="List View"
+                >
+                    <Icon name="list" size={20} />
+                </button>
+                <button 
+                  id="view-grid"
+                  class="p-2.5 rounded-xl bg-white text-emerald-500 shadow-sm view-toggle-btn"
+                  title="Grid View"
+                >
+                    <Icon name="grid-3x3" size={20} />
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {/* Result Count Indicator */}
+    <div class="flex items-center justify-end gap-2 mt-6 px-4">
+        <span class="result-count text-xs font-bold text-slate-400 uppercase tracking-widest">0 نتائج</span>
+        <div class="result-indicator w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/40 animate-pulse"></div>
+    </div>
+</section>
+
+<style>
+    .glass-search {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+    }
+</style>
+
+<script>
+    function initSearch() {
+        const gridToggle = document.getElementById('view-grid');
+        const listToggle = document.getElementById('view-list');
+        const contentGrid = document.getElementById('audio-grid-container');
+        const searchInput = document.getElementById('library-search') as HTMLInputElement;
+        const resultCountEl = document.querySelector('.result-count');
+        const resultIndicator = document.querySelector('.result-indicator');
+
+        const updateResults = () => {
+            const query = searchInput?.value.toLowerCase() || '';
+            const items = document.querySelectorAll('.searchable-item');
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                const term = (item as HTMLElement).dataset.searchTerm || '';
+                const isMatch = term.includes(query);
+                
+                if (isMatch) {
+                    (item as HTMLElement).style.display = '';
+                    visibleCount++;
+                } else {
+                    (item as HTMLElement).style.display = 'none';
+                }
+            });
+
+            if (resultCountEl) {
+                resultCountEl.textContent = `${visibleCount} نتائج`;
+            }
+
+            // Pulse indicator on change
+            if (resultIndicator) {
+                resultIndicator.classList.remove('animate-pulse');
+                void (resultIndicator as HTMLElement).offsetWidth; // trigger reflow
+                resultIndicator.classList.add('animate-pulse');
+            }
+        };
+
+        searchInput?.addEventListener('input', updateResults);
+
+        const setView = (view: 'grid' | 'list') => {
+            if (!contentGrid || !gridToggle || !listToggle) return;
+
+            if (view === 'grid') {
+                contentGrid.classList.remove('view-list');
+                contentGrid.classList.add('view-grid');
+                gridToggle.classList.add('bg-white', 'text-emerald-500', 'shadow-sm');
+                gridToggle.classList.remove('text-slate-400');
+                listToggle.classList.remove('bg-white', 'text-emerald-500', 'shadow-sm');
+                listToggle.classList.add('text-slate-400');
+            } else {
+                contentGrid.classList.remove('view-grid');
+                contentGrid.classList.add('view-list');
+                listToggle.classList.add('bg-white', 'text-emerald-500', 'shadow-sm');
+                listToggle.classList.remove('text-slate-400');
+                gridToggle.classList.remove('bg-white', 'text-emerald-500', 'shadow-sm');
+                gridToggle.classList.add('text-slate-400');
+            }
+            localStorage.setItem('library-view', view);
+        };
+
+        gridToggle?.addEventListener('click', () => setView('grid'));
+        listToggle?.addEventListener('click', () => setView('list'));
+
+        // Initialize
+        const savedView = localStorage.getItem('library-view') as 'grid' | 'list' | null;
+        if (savedView) setView(savedView);
+        updateResults();
+    }
+
+    initSearch();
+    document.addEventListener('astro:page-load', initSearch);
+</script>

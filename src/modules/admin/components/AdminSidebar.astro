@@ -1,0 +1,448 @@
+---
+import Icon from '../../../components/shared/Icon.astro';
+
+const { active = 'dashboard' } = Astro.props;
+const user = Astro.locals.user;
+
+const menuItems = [
+  { id: 'analytics', label: 'اعداد و شمار', icon: 'bar-chart-2', href: '/admin' },
+  { id: 'content', label: 'مواد', icon: 'music', href: '/admin/content' },
+  { id: 'uploading', label: 'اپلوڈنگ', icon: 'upload-cloud', href: '/admin/uploading' },
+  { id: 'speakers', label: 'مقررین', icon: 'users', href: '/admin/content/speakers' },
+  { id: 'audio-types', label: 'اقسام', icon: 'layers', href: '/admin/content/audio-types' },
+  { id: 'categories', label: 'زمرہ جات', icon: 'grid', href: '/admin/content/categories' },
+  { id: 'languages', label: 'زبانیں', icon: 'globe', href: '/admin/content/languages' },
+];
+---
+
+<aside 
+  id="admin-sidebar"
+  class="fixed right-0 top-0 h-full w-80 glass-premium border-l border-white/40 z-[100] flex flex-col p-8 font-urdu transition-all duration-700 shadow-premium transform translate-x-full lg:translate-x-0 invisible lg:visible"
+>
+  <!-- Decorative Blob -->
+  <div class="absolute -top-32 -right-32 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+  <!-- Mobile Close Button -->
+  <button 
+    id="close-sidebar" 
+    class="lg:hidden absolute left-4 top-8 w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-sm text-slate-400 hover:text-red-500 transition-all border border-slate-100"
+  >
+    <Icon name="x" size={20} />
+  </button>
+
+  <!-- Settings Trigger & Dropdown -->
+  <div class="absolute left-6 top-8 z-110" id="user-menu-container">
+    <button 
+      id="user-menu-trigger"
+      class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/80 border border-white shadow-sm hover:bg-emerald-500 hover:text-white hover:scale-110 transition-all duration-500 group/btn text-slate-500"
+      title="ترتیبات"
+    >
+      <Icon name="settings" size={20} class="transform group-hover/btn:rotate-180 transition-transform duration-700" />
+    </button>
+
+    <!-- Dropdown Menu -->
+    <div 
+      id="user-dropdown"
+      class="absolute left-0 top-full mt-4 w-72 bg-white/95 backdrop-blur-xl border border-white rounded-4xl shadow-2xl p-5 opacity-0 invisible translate-y-4 transition-all duration-500 z-110"
+    >
+      <div class="space-y-3">
+        <div class="px-5 py-4 mb-3 border-b border-slate-900/5 bg-slate-50/50 rounded-2xl">
+          <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">لاگ ان بذریعہ</p>
+          <p class="text-sm font-black text-slate-900 ltr truncate">{user?.email || 'admin@fikreislam.com'}</p>
+        </div>
+
+        <button 
+          id="open-password-modal"
+          class="w-full flex items-center gap-4 px-5 py-4 rounded-xl text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-300 group/item"
+        >
+          <Icon name="lock" size={18} class="group-hover/item:scale-110 transition-transform" />
+          <span class="font-black text-sm">پاس ورڈ تبدیل کریں</span>
+        </button>
+
+        <button 
+          id="logout-btn-dropdown"
+          class="w-full flex items-center gap-4 px-5 py-4 rounded-xl text-red-500 hover:bg-red-50 transition-all duration-300 group/item"
+        >
+          <Icon name="logout" size={18} class="group-hover/item:-translate-x-1 transition-transform" />
+          <span class="font-black text-sm">خروج</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- Logo Section -->
+  <div class="flex items-center gap-4 mb-14 px-2 group cursor-pointer">
+    <div class="w-14 h-14 flex items-center justify-center transform group-hover:rotate-12 transition-all duration-500 overflow-hidden">
+      <img src="/logo.png" alt="فکر اسلام لوگو" class="w-full h-full object-contain" />
+    </div>
+    <div class="flex flex-col">
+        <h2 class="text-3xl font-black text-slate-900 tracking-tight leading-none">فکر اسلام</h2>
+        <span class="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mt-1 opacity-80">مرکزی انتظام</span>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 space-y-10 overflow-y-auto custom-scrollbar ltr-scrollbar rtl pr-2">
+    <div class="space-y-3">
+        {menuItems.map((item) => (
+        <a
+            href={item.href}
+            data-id={item.id}
+            class={`flex items-center justify-between px-6 py-4 rounded-3xl transition-all duration-500 group ${
+            active === item.id 
+                ? 'bg-emerald-500 text-white shadow-[0_15px_30px_-5px_rgba(16,185,129,0.3)] scale-[1.02]' 
+                : 'text-slate-500 hover:bg-white hover:text-emerald-600 hover:shadow-sm'
+            }`}
+        >
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <Icon name={item.icon} size={22} class={`transition-transform group-hover:scale-110 ${item.id === 'uploading' ? 'animate-pulse' : ''}`} />
+                    {item.id === 'uploading' && <div class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white shadow-sm hidden"></div>}
+                </div>
+                <span class="text-lg font-black">{item.label}</span>
+            </div>
+            {active === item.id && <div class="w-2 h-2 rounded-full bg-white shadow-glow-white animate-pulse"></div>}
+        </a>
+        ))}
+    </div>
+  </nav>
+
+  <script is:inline>
+    // Background Upload Manager (Persistent across navigations)
+    const UPLOAD_STORAGE_KEY = 'fi_active_uploads';
+    if (!window.activeUploads) {
+        window.activeUploads = JSON.parse(localStorage.getItem(UPLOAD_STORAGE_KEY) || '[]');
+    }
+    
+    const broadcastUploads = () => {
+        localStorage.setItem(UPLOAD_STORAGE_KEY, JSON.stringify(window.activeUploads));
+        window.dispatchEvent(new CustomEvent('uploads-updated', { detail: window.activeUploads }));
+        updateSidebarIndicator();
+    };
+
+    const updateSidebarIndicator = () => {
+        const hasActive = window.activeUploads.some(u => u.status === 'uploading');
+        const indicator = document.querySelector('[data-id="uploading"] .absolute.rounded-full');
+        if (indicator) {
+            if (hasActive) {
+                indicator.classList.remove('hidden');
+                indicator.classList.add('animate-pulse');
+            } else {
+                indicator.classList.add('hidden');
+                indicator.classList.remove('animate-pulse');
+            }
+        }
+    };
+
+    window.startBackgroundUpload = async (formData, title) => {
+        const uploadId = Date.now().toString();
+        const newUpload = {
+            id: uploadId,
+            title: title || 'بغیر عنوان مواد',
+            status: 'uploading',
+            progress: 0,
+            startTime: new Date().toISOString()
+        };
+        
+        window.activeUploads.unshift(newUpload);
+        broadcastUploads();
+
+        try {
+            const response = await fetch('/api/admin/upload-content', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const upload = window.activeUploads.find(u => u.id === uploadId);
+                if (upload) {
+                    upload.status = 'completed';
+                    upload.progress = 100;
+                    upload.endTime = new Date().toISOString();
+                }
+                if (window.showToast) window.showToast('مواد کامیابی سے اپ لوڈ ہو گیا!', 'success');
+            } else {
+                const errorText = await response.text();
+                throw new Error(errorText || 'اپ لوڈنگ میں غلطی');
+            }
+        } catch (error) {
+            console.error('Upload Error:', error);
+            const upload = window.activeUploads.find(u => u.id === uploadId);
+            if (upload) {
+                upload.status = 'failed';
+                upload.error = error.message;
+            }
+            if (window.showToast) window.showToast('اپ لوڈنگ میں غلطی آئی۔', 'error');
+        } finally {
+            broadcastUploads();
+        }
+    };
+
+    // Poll/Cleanup old completed uploads (e.g. older than 1 hour)
+    const cleanupUploads = () => {
+        const now = Date.now();
+        const oneHour = 60 * 60 * 1000;
+        window.activeUploads = window.activeUploads.filter(u => {
+            if (u.status === 'uploading') return true;
+            const startTime = new Date(u.startTime).getTime();
+            return (now - startTime) < oneHour;
+        });
+        broadcastUploads();
+    };
+    
+    setInterval(cleanupUploads, 5 * 60 * 1000); // Every 5 mins
+
+    document.addEventListener('astro:page-load', () => {
+      const trigger = document.getElementById('user-menu-trigger');
+      const dropdown = document.getElementById('user-dropdown');
+      const container = document.getElementById('user-menu-container');
+
+      const toggleDropdown = (show) => {
+        if (show) {
+          dropdown?.classList.remove('invisible', 'opacity-0', 'translate-y-4');
+        } else {
+          dropdown?.classList.add('invisible', 'opacity-0', 'translate-y-4');
+        }
+      };
+
+      trigger?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isVisible = dropdown && !dropdown.classList.contains('invisible');
+        toggleDropdown(!isVisible);
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!container?.contains(e.target)) {
+          toggleDropdown(false);
+        }
+      });
+
+      const logoutBtnDropdown = document.getElementById('logout-btn-dropdown');
+      logoutBtnDropdown?.addEventListener('click', () => {
+        logoutBtnDropdown.innerHTML = 'خروج ہو رہا ہے...';
+        logoutBtnDropdown.classList.add('opacity-70', 'cursor-not-allowed');
+        window.location.href = '/api/auth/signout';
+      });
+
+      // Password Modal Logic
+      const modal = document.getElementById('password-modal');
+      const modalContent = document.getElementById('password-modal-content');
+      const openModalBtn = document.getElementById('open-password-modal');
+      const closeModalBtn = document.getElementById('close-password-modal');
+      const modalOverlay = document.getElementById('password-modal-overlay');
+      const passwordForm = document.getElementById('password-form');
+      const submitBtn = document.getElementById('password-submit-btn');
+
+      const toggleModal = (show) => {
+        if (show) {
+          modal?.classList.remove('invisible', 'opacity-0');
+          modalContent?.classList.remove('translate-y-8');
+          toggleDropdown(false);
+        } else {
+          modal?.classList.add('invisible', 'opacity-0');
+          modalContent?.classList.add('translate-y-8');
+        }
+      };
+
+      openModalBtn?.addEventListener('click', () => toggleModal(true));
+      closeModalBtn?.addEventListener('click', () => toggleModal(false));
+      modalOverlay?.addEventListener('click', () => toggleModal(false));
+
+      // Visibility Toggle Logic
+      document.querySelectorAll('.password-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const input = btn.parentElement?.querySelector('input');
+          const eye = btn.querySelector('.eye-icon');
+          const eyeOff = btn.querySelector('.eye-off-icon');
+          
+          if (input?.type === 'password') {
+            input.type = 'text';
+            eye?.classList.add('hidden');
+            eye?.classList.remove('block');
+            eyeOff?.classList.add('block');
+            eyeOff?.classList.remove('hidden');
+          } else if (input) {
+            input.type = 'password';
+            eye?.classList.add('block');
+            eye?.classList.remove('hidden');
+            eyeOff?.classList.add('hidden');
+            eyeOff?.classList.remove('block');
+          }
+        });
+      });
+
+      passwordForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(passwordForm);
+        const newPassword = formData.get('newPassword');
+        const confirmPassword = formData.get('confirmPassword');
+
+        if (newPassword !== confirmPassword) {
+            if (window.showToast) window.showToast('پاس ورڈ مطابقت نہیں رکھتے۔', 'error');
+            return;
+        }
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'تبدیلی ہو رہی ہے...';
+        submitBtn.classList.add('opacity-70');
+
+        try {
+          const response = await fetch('/api/admin/update-password', {
+            method: 'POST',
+            body: formData
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            if (window.showToast) window.showToast(result.message || 'پاس ورڈ کامیابی سے تبدیل کر دیا گیا ہے۔', 'success');
+            toggleModal(false);
+            passwordForm.reset();
+          } else {
+            const errorText = await response.text();
+            if (window.showToast) window.showToast(errorText || 'پاس ورڈ تبدیل کرنے میں غلطی۔', 'error');
+          }
+        } catch (error) {
+          if (window.showToast) window.showToast('سسٹم میں خرابی۔', 'error');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'تبدیل کریں';
+          submitBtn.classList.remove('opacity-70');
+        }
+      });
+
+      updateSidebarIndicator();
+    });
+  </script>
+
+</aside>
+
+<!-- Password Modal -->
+<div 
+  id="password-modal"
+  class="fixed inset-0 z-200 flex items-center justify-center invisible opacity-0 transition-all duration-500 p-6"
+>
+  <!-- Modal Backdrop -->
+  <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-md" id="password-modal-overlay"></div>
+  
+  <!-- Modal Content -->
+  <div class="relative w-full max-w-md bg-white border border-white rounded-4xl shadow-2xl p-10 transform translate-y-8 transition-all duration-500" id="password-modal-content">
+    <div class="text-right mb-8">
+      <h3 class="text-2xl font-black text-slate-900 mb-2">پاس ورڈ تبدیل کریں</h3>
+      <p class="text-sm text-slate-400">اپنا اکاؤنٹ محفوظ رکھنے کے لیے مضبوط پاس ورڈ استعمال کریں۔</p>
+    </div>
+
+      <form id="password-form" class="space-y-6">
+        <div class="space-y-2">
+          <label class="block text-sm font-black text-slate-700 mr-1">موجودہ پاس ورڈ</label>
+          <div class="relative group/pass">
+            <input 
+              type="password" 
+              name="currentPassword" 
+              required 
+              class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all outline-none font-sans"
+              placeholder="••••••••"
+            />
+            <button 
+              type="button" 
+              class="password-toggle absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-500 transition-colors"
+              title="دیکھیں"
+            >
+              <Icon name="eye" size={20} class="eye-icon block" data-icon="eye" />
+              <Icon name="eye-off" size={20} class="eye-off-icon hidden" data-icon="eye-off" />
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-sm font-black text-slate-700 mr-1">نیا پاس ورڈ</label>
+          <div class="relative group/pass">
+            <input 
+              type="password" 
+              name="newPassword" 
+              id="new-password-input"
+              required 
+              class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all outline-none font-sans"
+              placeholder="••••••••"
+            />
+            <button 
+              type="button" 
+              class="password-toggle absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-500 transition-colors"
+              title="دیکھیں"
+            >
+              <Icon name="eye" size={20} class="eye-icon block" data-icon="eye" />
+              <Icon name="eye-off" size={20} class="eye-off-icon hidden" data-icon="eye-off" />
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-sm font-black text-slate-700 mr-1">پاس ورڈ کی تصدیق</label>
+          <div class="relative group/pass">
+            <input 
+              type="password" 
+              name="confirmPassword" 
+              id="confirm-password-input"
+              required 
+              class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all outline-none font-sans"
+              placeholder="••••••••"
+            />
+            <button 
+              type="button" 
+              class="password-toggle absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-500 transition-colors"
+              title="دیکھیں"
+            >
+              <Icon name="eye" size={20} class="eye-icon block" data-icon="eye" />
+              <Icon name="eye-off" size={20} class="eye-off-icon hidden" data-icon="eye-off" />
+            </button>
+          </div>
+        </div>
+
+      <div class="space-y-2 text-right">
+          <button 
+              type="submit"
+              id="password-submit-btn"
+              class="w-full py-4 bg-emerald-500 text-white rounded-2xl font-black text-lg shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 hover:-translate-y-1 transition-all duration-300"
+          >
+              تبدیل کریں
+          </button>
+          <button 
+              type="button"
+              id="close-password-modal"
+              class="w-full py-4 text-slate-400 font-black text-sm hover:text-slate-600 transition-colors"
+          >
+              کینسل کریں
+          </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Mobile Overlay -->
+<div 
+  id="sidebar-overlay" 
+  class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[55] hidden lg:hidden transition-opacity opacity-0"
+></div>
+
+<style>
+  .glass-heavy {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+  }
+  .ltr-scrollbar {
+      direction: ltr;
+  }
+  .rtl {
+      direction: rtl;
+  }
+</style>

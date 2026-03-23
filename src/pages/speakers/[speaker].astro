@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import clientPromise from '../../lib/mongodb';
+import type { MediaItem } from '../../lib/schemas';
+
+const { speaker } = Astro.params;
+
+if (!speaker) {
+  return Astro.redirect('/');
+}
+
+// Securely connect and fetch data
+const client = await clientPromise;
+const db = client.db('fikreislam');
+const collection = db.collection('media_catalog');
+
+const mediaItems = await collection
+  .find({ speaker })
+  .sort({ createdAt: -1 })
+  .toArray();
+
+const title = `خطبات: ${speaker} — فکر اسلام`;
+---
+
+<BaseLayout title={title}>
+  <div class="max-w-4xl mx-auto p-6 py-12">
+    <div class="mb-12">
+      <h1 class="text-4xl font-black text-slate-900 font-urdu mb-2">{speaker}</h1>
+      <p class="text-slate-500 font-bold uppercase tracking-widest text-xs">Media Library / Speaker-Based Archive</p>
+    </div>
+
+    {mediaItems.length === 0 ? (
+      <div class="py-20 text-center glass-premium rounded-3xl border border-dashed border-slate-200">
+        <p class="text-slate-400 font-urdu text-xl font-bold">اس مقرر کے لیے کوئی مواد نہیں ملا</p>
+      </div>
+    ) : (
+      <div class="space-y-6">
+        {mediaItems.map((item) => (
+          <div class="glass-premium p-8 rounded-[2rem] border border-white shadow-premium hover:-translate-y-1 transition-all">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div>
+                <span class="px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-100 mb-4 inline-block">
+                  {item.mediaType}
+                </span>
+                <h3 class="text-2xl font-black text-slate-800 font-urdu leading-tight">{item.title}</h3>
+                <p class="text-slate-400 text-sm font-bold mt-2 uppercase tracking-wide">
+                  {item.collection} / {item.subcollection}
+                </p>
+              </div>
+              
+              <div class="w-full md:w-auto">
+                {item.mediaType === 'audio' && (
+                  <audio controls class="w-full md:w-64 accent-emerald-500">
+                    <source src={item.archiveUrl} type="audio/mpeg" />
+                    Your browser does not support the audio element.
+                  </audio>
+                )}
+                {item.mediaType === 'video' && (
+                  <a 
+                    href={item.archiveUrl} 
+                    target="_blank" 
+                    class="px-8 py-3 rounded-xl bg-slate-900 text-white text-sm font-black hover:bg-slate-800 transition-all text-center block"
+                  >
+                    مواد دیکھیں
+                  </a>
+                )}
+                {(item.mediaType === 'book' || item.mediaType === 'text') && (
+                   <a 
+                    href={item.archiveUrl} 
+                    target="_blank" 
+                    class="px-8 py-3 rounded-xl bg-emerald-500 text-white text-sm font-black hover:bg-emerald-600 transition-all text-center block"
+                  >
+                    ڈاؤن لوڈ کریں
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</BaseLayout>

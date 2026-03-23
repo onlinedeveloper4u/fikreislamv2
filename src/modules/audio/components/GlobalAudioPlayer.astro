@@ -1,0 +1,238 @@
+---
+// src/modules/audio/components/GlobalAudioPlayer.astro
+import Icon from '../../../components/shared/Icon.astro';
+---
+
+<div id="global-player" class="fixed bottom-0 left-0 right-0 z-[100] p-4 md:p-6 transition-all duration-700 translate-y-full opacity-0 pointer-events-none">
+    <div class="max-w-5xl mx-auto glass-premium shadow-premium p-4 md:p-5 pointer-events-auto rounded-[2.5rem] flex items-center gap-6">
+        {/* Track Info */}
+        <div class="flex items-center gap-4 flex-1 min-w-0">
+            <div id="player-cover" class="w-14 h-14 rounded-2xl bg-white shadow-md border border-slate-100 flex items-center justify-center shrink-0 overflow-hidden group">
+                <Icon name="music" size={24} class="text-emerald-500 group-hover:scale-110 transition-transform" />
+            </div>
+            <div class="min-w-0 flex-1">
+                <h4 id="player-title" class="font-urdu text-lg font-bold text-slate-900 truncate tracking-tight">تیاری میں ہے...</h4>
+                <div class="flex items-center gap-2 mt-0.5 opacity-60">
+                    <span id="player-author" class="text-xs font-bold text-slate-500 truncate uppercase">---</span>
+                    <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                    <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Playing Now</span>
+                </div>
+            </div>
+        </div>
+
+        {/* Multi-tier Controls for Premium Feel */}
+        <div class="flex flex-col gap-2 items-center flex-1 max-w-md">
+            <div class="flex items-center gap-6">
+                <button id="player-skip-back" class="text-slate-400 hover:text-emerald-500 transition-all transform hover:scale-110" aria-label="Skip Back">
+                    <Icon name="skip-back" size={22} />
+                </button>
+                <button id="player-toggle" class="w-14 h-14 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-xl shadow-emerald-500/30 hover:bg-emerald-600 hover:scale-110 active:scale-95 transition-all animate-glow">
+                    <div id="play-icon">
+                        <Icon name="play" size={28} />
+                    </div>
+                    <div id="pause-icon" class="hidden">
+                        <Icon name="pause" size={28} />
+                    </div>
+                </button>
+                <button id="player-skip-forward" class="text-slate-400 hover:text-emerald-500 transition-all transform hover:scale-110" aria-label="Skip Forward">
+                    <Icon name="skip-forward" size={22} />
+                </button>
+            </div>
+            
+            {/* Progress Area */}
+            <div class="w-full flex items-center gap-3">
+                <span id="player-current-time" class="text-[10px] font-bold text-slate-400 w-10 text-right">0:00</span>
+                <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden relative group cursor-pointer" id="player-progress-container">
+                    <div id="player-progress-bar" class="h-full bg-emerald-500 w-0 relative rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                </div>
+                <span id="player-total-time" class="text-[10px] font-bold text-slate-400 w-10">0:00</span>
+            </div>
+        </div>
+
+        {/* Actions & Speed */}
+        <div class="flex items-center gap-4">
+            <button id="player-speed" class="px-4 py-2 rounded-xl bg-white border border-slate-100 text-xs font-bold text-slate-600 hover:border-emerald-500/30 hover:text-emerald-600 transition-all shadow-sm">1x Speed</button>
+            <div class="w-px h-8 bg-slate-100"></div>
+            <button id="player-close" class="text-slate-300 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-xl">
+                <Icon name="x" size={20} />
+            </button>
+        </div>
+    </div>
+    
+    <audio id="main-audio" class="hidden"></audio>
+</div>
+
+<script>
+    // Audio Player Logic (Vanilla)
+    class GlobalAudioPlayer {
+        player: HTMLElement | null;
+        audio: HTMLAudioElement | null;
+        toggleBtn: HTMLElement | null;
+        playIcon: HTMLElement | null;
+        pauseIcon: HTMLElement | null;
+        progressBar: HTMLElement | null;
+        progressContainer: HTMLElement | null;
+        timeLabel: HTMLElement | null;
+        speedBtn: HTMLElement | null;
+        titleEl: HTMLElement | null;
+        authorEl: HTMLElement | null;
+        
+        isPlaying = false;
+        speeds = [1, 1.25, 1.5, 2, 0.5, 0.75];
+        speedIndex = 0;
+
+        constructor() {
+            this.player = document.getElementById('global-player');
+            this.audio = document.getElementById('main-audio') as HTMLAudioElement;
+            this.toggleBtn = document.getElementById('player-toggle');
+            this.playIcon = document.getElementById('play-icon');
+            this.pauseIcon = document.getElementById('pause-icon');
+            this.progressBar = document.getElementById('player-progress-bar');
+            this.progressContainer = document.getElementById('player-progress-container');
+            this.timeLabel = document.getElementById('player-time');
+            this.speedBtn = document.getElementById('player-speed');
+            this.titleEl = document.getElementById('player-title');
+            this.authorEl = document.getElementById('player-author');
+
+            this.init();
+        }
+
+        init() {
+            if (!this.audio) return;
+
+            // Event Listeners
+            this.toggleBtn?.addEventListener('click', () => this.toggle());
+            this.speedBtn?.addEventListener('click', () => this.cycleSpeed());
+            
+            this.audio.addEventListener('timeupdate', () => this.updateProgress());
+            this.audio.addEventListener('loadedmetadata', () => this.updateProgress());
+            this.audio.addEventListener('ended', () => this.onEnded());
+
+            this.progressContainer?.addEventListener('click', (e) => this.seek(e));
+
+            // Listen for global play events
+            document.addEventListener('play-audio', (e: any) => {
+                const { url, title, author } = e.detail;
+                this.play(url, title, author);
+            });
+
+            document.getElementById('player-close')?.addEventListener('click', () => this.stop());
+            document.getElementById('player-skip-back')?.addEventListener('click', () => this.skip(-10));
+            document.getElementById('player-skip-forward')?.addEventListener('click', () => this.skip(10));
+        }
+
+        play(url: string, title: string, author: string) {
+            if (!this.audio || !this.player) return;
+
+            if (this.audio.src !== url) {
+                this.audio.src = url;
+                if (this.titleEl) this.titleEl.textContent = title;
+                if (this.authorEl) this.authorEl.textContent = author || '---';
+            }
+
+            this.audio.play();
+            this.isPlaying = true;
+            this.updateUI();
+            
+            // Show player
+            this.player.classList.remove('translate-y-full', 'opacity-0', 'pointer-events-none');
+        }
+
+        toggle() {
+            if (!this.audio) return;
+            if (this.audio.paused) {
+                this.audio.play();
+                this.isPlaying = true;
+            } else {
+                this.audio.pause();
+                this.isPlaying = false;
+            }
+            this.updateUI();
+        }
+
+        stop() {
+            if (!this.audio || !this.player) return;
+            this.audio.pause();
+            this.audio.src = '';
+            this.isPlaying = false;
+            this.player.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
+        }
+
+        skip(seconds: number) {
+            if (!this.audio) return;
+            this.audio.currentTime += seconds;
+        }
+
+        cycleSpeed() {
+            if (!this.audio || !this.speedBtn) return;
+            this.speedIndex = (this.speedIndex + 1) % this.speeds.length;
+            const speed = this.speeds[this.speedIndex];
+            this.audio.playbackRate = speed;
+            this.speedBtn.textContent = `${speed}x`;
+        }
+
+        seek(e: MouseEvent) {
+            if (!this.audio || !this.progressContainer) return;
+            const rect = this.progressContainer.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            this.audio.currentTime = pos * this.audio.duration;
+        }
+
+        updateProgress() {
+            if (!this.audio || !this.progressBar) return;
+            const progress = (this.audio.currentTime / this.audio.duration) * 100;
+            this.progressBar.style.width = `${progress}%`;
+            
+            const currentEl = document.getElementById('player-current-time');
+            const totalEl = document.getElementById('player-total-time');
+            
+            if (currentEl) currentEl.textContent = this.formatTime(this.audio.currentTime);
+            if (totalEl) totalEl.textContent = this.formatTime(this.audio.duration);
+        }
+
+        formatTime(seconds: number) {
+            if (isNaN(seconds)) return '0:00';
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        updateUI() {
+            if (this.isPlaying) {
+                this.playIcon?.classList.add('hidden');
+                this.pauseIcon?.classList.remove('hidden');
+            } else {
+                this.playIcon?.classList.remove('hidden');
+                this.pauseIcon?.classList.add('hidden');
+            }
+        }
+
+        onEnded() {
+            this.isPlaying = false;
+            this.updateUI();
+        }
+    }
+
+    // Initialize once and persist
+    let player: GlobalAudioPlayer;
+    
+    // Handle Astro transitions
+    document.addEventListener('astro:page-load', () => {
+        if (!player) {
+            player = new GlobalAudioPlayer();
+            // @ts-ignore
+            window.audioPlayer = player;
+        }
+    });
+
+    // Re-bind elements if needed (though transition:persist handles this)
+</script>
+
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 1.5rem;
+    }
+</style>

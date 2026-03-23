@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* ── Jameel Noori Nastaleeq Font ── */
+@font-face {
+  font-family: 'Jameel Noori Nastaleeq';
+  src: url('https://cdn.jsdelivr.net/gh/tariq-abdullah/urdu-web-font-CDN/JameelNooriNastaleeq.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ── Light Horizon Theme ── */
 @theme {
   --color-night-900: #ffffff;
@@ -22,14 +31,14 @@
   --color-glass-white-60: rgba(0, 0, 0, 0.6);
   --color-glass-white-80: rgba(0, 0, 0, 0.8);
 
-  --font-display: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  --font-urdu: "Noto Nastaliq Urdu", "Jameel Noori Nastaliq", serif;
+  --font-urdu: "Jameel Noori Nastaleeq", serif;
+  --font-display: var(--font-urdu);
+  --font-body: var(--font-urdu);
 }
 
 .font-urdu {
   font-family: var(--font-urdu);
-  line-height: 1.8 !important;
+  line-height: 2 !important;
 }
 
 /* ── Base Reset ── */
@@ -43,6 +52,7 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  direction: rtl;
 }
 
 body {
@@ -50,10 +60,9 @@ body {
   background-color: var(--color-night-800);
   color: var(--color-glass-white-80);
   font-family: var(--font-urdu);
-  line-height: 1.8;
+  line-height: 2;
   overflow-x: hidden;
   min-height: 100vh;
-  /* Add padding to ensure content isn't cut off by persistent audio player */
   padding-bottom: 80px;
 }
 
@@ -77,46 +86,47 @@ body {
 
 /* ── Glassmorphism Utilities ── */
 .glass {
-  background: var(--color-glass-white-5);
+  background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--color-glass-white-10);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.glass-heavy {
-  background: var(--color-glass-white-8);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  border: 1px solid var(--color-glass-white-10);
+.glass-dark {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .glass-card {
-  background: var(--color-glass-white-5);
+  background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--color-glass-white-8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 1.5rem;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .glass-card:hover {
-  background: var(--color-glass-white-8);
-  border-color: var(--color-glass-white-15);
-  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
 }
 
 /* ── Gradient Utilities ── */
 .gradient-emerald {
-  background: linear-gradient(135deg, var(--color-emerald-dim), var(--color-emerald-accent));
+  background: linear-gradient(135deg, #d1fae5, #34d399);
 }
 
 .gradient-emerald-glow {
-  background: linear-gradient(135deg, var(--color-emerald-accent), var(--color-emerald-glow));
+  background: linear-gradient(135deg, #34d399, #10b981);
 }
 
 .text-gradient-emerald {
-  background: linear-gradient(135deg, var(--color-emerald-glow), var(--color-emerald-light));
+  background: linear-gradient(135deg, #10b981, #059669);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -124,78 +134,17 @@ body {
 
 /* ── Animations ── */
 @keyframes float {
-
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-12px);
-  }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
 }
 
 @keyframes pulse-glow {
-
-  0%,
-  100% {
-    filter: drop-shadow(0 0 12px rgba(64, 145, 108, 0.2));
-  }
-
-  50% {
-    filter: drop-shadow(0 0 24px rgba(64, 145, 108, 0.4));
-  }
+  0%, 100% { filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.2)); }
+  50% { filter: drop-shadow(0 0 24px rgba(16, 185, 129, 0.4)); }
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-.animate-shimmer {
-  background-size: 200% 100%;
-  animation: shimmer 3s linear infinite;
-}
-
-/* Waveform Animation */
-@keyframes wave {
-
-  0%,
-  100% {
-    height: 4px;
-  }
-
-  50% {
-    height: 16px;
-  }
-}
-
-.waveform-line {
-  width: 3px;
-  background-color: currentColor;
-  border-radius: 99px;
-  animation: wave 1s ease-in-out infinite;
-}
-
-/* Button Active States for Mobile */
-button:active,
-.glass-card:active {
-  transform: scale(0.96) !important;
-  opacity: 0.9;
-}
+.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
 
 /* ── Layout Utilities ── */
 .container-app {
@@ -206,98 +155,23 @@ button:active,
   padding-right: 1rem;
 }
 
-@media (min-width: 640px) {
-  .container-app {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-}
+@media (min-width: 640px) { .container-app { padding-left: 1.5rem; padding-right: 1.5rem; } }
+@media (min-width: 1024px) { .container-app { padding-left: 2rem; padding-right: 2rem; } }
 
-@media (min-width: 1024px) {
-  .container-app {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-}
-
-/* ── Audio Grid ── */
+/* ── Bento Grid ── */
 .bento-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
-/* All Mobiles & Small Tablets: 2 columns */
-@media (min-width: 320px) {
-  .bento-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.75rem;
-  }
-}
+@media (min-width: 640px) { .bento-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .bento-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1280px) { .bento-grid { grid-template-columns: repeat(4, 1fr); } }
 
-/* Tablets: 3 columns */
-@media (min-width: 768px) {
-  .bento-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 1.25rem;
-  }
-}
-
-/* Desktop: 4 columns */
-@media (min-width: 1024px) {
-  .bento-grid {
-    grid-template-columns: repeat(4, 1fr) !important;
-    gap: 1.5rem;
-  }
-}
-
-/* Force all items to NOT span multiple columns/rows */
-.bento-grid>* {
-  grid-column: span 1 !important;
-  grid-row: span 1 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  height: 100% !important;
-}
-
-/* Updated Card Styles for better visibility */
-.glass-card {
-  background: #ffffff;
-  border: 1px solid rgba(15, 23, 42, 0.05);
-  border-radius: 1rem;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.glass-card:active {
-  transform: scale(0.97);
-  background: #f8fafc;
-}
-
-.language-badge {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-/* Ensure all card images/placeholders have the same exact square dimensions */
-.glass-card .aspect-square {
-  aspect-ratio: 1 / 1 !important;
-  width: 100% !important;
-  height: auto !important;
-  flex-shrink: 0 !important;
-}
-
-/* ── View Transition Defaults ── */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.35s;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* ── Selection ── */
+/* ── RTL Fixes ── */
+.ltr { direction: ltr; }
+.rtl { direction: rtl; }
 ::selection {
   background: rgba(16, 185, 129, 0.2);
   color: rgb(15, 23, 42);

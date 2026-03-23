@@ -1,18 +1,23 @@
 ---
 import { ClientRouter } from 'astro:transitions';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
-import GlobalAudioPlayer from '../components/GlobalAudioPlayer';
-import '../styles/global.css';
+import Navbar from '../components/shared/Navbar.astro';
+import Footer from '../components/shared/Footer.astro';
+import Toast from '../components/shared/Toast.astro';
+import GlobalAudioPlayer from '../modules/audio/components/GlobalAudioPlayer.astro';
+import '../styles/main.css';
 
 interface Props {
   title?: string;
   description?: string;
+  showNav?: boolean;
+  showFooter?: boolean;
 }
 
 const {
   title = 'فکر اسلام — مستند اسلامی مواد',
   description = 'مستند اسلامی کتب، خطبات اور ویڈیوز کا ایک جامع ذخیرہ — قابل اعتماد علماء سے',
+  showNav = true,
+  showFooter = true,
 } = Astro.props;
 ---
 
@@ -22,30 +27,27 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#121212" />
+    <meta name="theme-color" content="#10b981" />
     <link rel="icon" type="image/png" href="/logo.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Nastaliq+Urdu:wght@400..700&display=swap"
-      rel="stylesheet"
-    />
     <title>{title}</title>
     <ClientRouter />
   </head>
-  <body class="bg-slate-50 text-slate-900/80 antialiased">
-    <!-- Navbar (React island) -->
-    <Navbar client:load />
+  <body class="bg-slate-50 text-slate-900/80 antialiased font-urdu">
+    {/* Common Toast component */}
+    <Toast />
 
-    <!-- Page Content -->
-    <main>
+    {/* Navbar */}
+    {showNav && <Navbar />}
+
+    {/* Page Content */}
+    <main class={`min-h-screen ${showNav ? 'pt-20' : ''}`}>
       <slot />
     </main>
 
-    <!-- Footer -->
-    <Footer client:visible />
+    {/* Footer */}
+    {showFooter && <Footer />}
 
-    <!-- Persistent Audio Player — survives view transitions -->
-    <GlobalAudioPlayer client:load transition:persist />
+    {/* Persistent Audio Player */}
+    <GlobalAudioPlayer transition:persist />
   </body>
 </html>

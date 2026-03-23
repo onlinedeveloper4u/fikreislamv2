@@ -1,0 +1,71 @@
+---
+// src/modules/auth/components/ResetSuccess.astro
+import Icon from '../../../components/shared/Icon.astro';
+---
+
+<div class="w-full max-w-md mx-auto p-4 animate-fade-in-up">
+    <div class="bg-white rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] p-10 md:p-14 text-center relative overflow-hidden">
+        {/* Logo Section */}
+        <div class="mb-8 relative z-10 transition-transform duration-500 hover:scale-110">
+            <div class="w-28 h-28 mx-auto rounded-full overflow-hidden">
+                <img src="/logo.png" alt="فکر اسلام لوگو" class="w-full h-full object-contain" />
+            </div>
+        </div>
+
+        {/* Success Icon */}
+        <div class="mb-10 relative z-10">
+            <div class="w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-700 animate-pop-in">
+                <div class="text-emerald-600">
+                    <Icon name="check" size={48} />
+                </div>
+            </div>
+            <h1 class="text-3xl font-black text-emerald-800 font-urdu leading-tight">ری سیٹ لنک بھیج دیا گیا ہے</h1>
+            <p class="text-slate-500 font-bold text-sm font-urdu mt-4 leading-relaxed px-4 opacity-80">
+                ہم نے آپ کا پاس ورڈ تبدیل کرنے کے لیے آپ کے ای میل پر ایک لنک بھیج دیا ہے۔ براہ کرم اپنا ان باکس چیک کریں۔
+            </p>
+        </div>
+
+        <div class="space-y-6 relative z-10">
+            <a 
+                href="/login"
+                class="block w-full py-5 rounded-2xl bg-[#1a6336] text-white font-black text-xl shadow-lg shadow-emerald-900/10 hover:bg-[#14532d] hover:-translate-y-1 active:scale-95 transition-all text-center font-urdu"
+            >
+                لاگ ان پر واپس جائیں
+            </a>
+
+            <button 
+                id="resend-btn"
+                class="text-sm font-bold text-slate-400 hover:text-emerald-700 transition-colors font-urdu flex items-center justify-center gap-2 mx-auto group"
+            >
+                ای میل نہیں ملی؟ <span class="text-emerald-600 group-hover:underline">دوبارہ بھیجیں</span>
+            </button>
+        </div>
+
+        <div class="mt-10 text-slate-400 text-[10px] font-bold font-urdu opacity-60">
+            © 2026 فکر اسلام۔ جملہ حقوق محفوظ ہیں۔
+        </div>
+
+        {/* Decorative elements */}
+        <div class="absolute -bottom-20 -left-20 w-40 h-40 bg-emerald-50 rounded-full blur-3xl -z-10"></div>
+    </div>
+</div>
+
+<style>
+    @keyframes popIn {
+        0% { transform: scale(0.5); opacity: 0; }
+        70% { transform: scale(1.1); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop-in {
+        animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+</style>
+
+<script>
+    const resendBtn = document.getElementById('resend-btn');
+    resendBtn?.addEventListener('click', () => {
+        // Simple visual feedback for resend
+        // @ts-ignore
+        if (window.toast) window.toast.show("ری سیٹ لنک دوبارہ بھیج دیا گیا ہے!", "success");
+    });
+</script>

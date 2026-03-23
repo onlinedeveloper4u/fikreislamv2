@@ -1,0 +1,16 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import TaxonomyManager from '../../../modules/admin/components/TaxonomyManager.astro';
+
+const search = Astro.url.searchParams.get('search') || '';
+---
+
+<AdminLayout title="اقسام کا انتظام — فکر اسلام" active="categories">
+  <TaxonomyManager 
+    table="categories" 
+    title="اقسام" 
+    icon="grid" 
+    placeholder="قسم کا نام درج کریں..."
+    search={search}
+  />
+</AdminLayout>

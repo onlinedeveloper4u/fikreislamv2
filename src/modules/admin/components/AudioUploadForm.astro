@@ -1,0 +1,1149 @@
+---
+// src/modules/admin/components/AudioUploadForm.astro
+import Icon from '../../../components/shared/Icon.astro';
+import { getDb } from '../../../lib/db';
+
+interface Props {
+    editData?: any;
+    contentId?: string;
+}
+
+const { editData, contentId } = Astro.props;
+
+// Fetch taxonomies on the server from MongoDB
+const db = await getDb();
+const [speakersData, audioTypesData, languagesData, categoriesData] = await Promise.all([
+    db.collection('speakers').find().sort({ name: 1 }).toArray(),
+    db.collection('audio_types').find().sort({ name: 1 }).toArray(),
+    db.collection('languages').find().sort({ name: 1 }).toArray(),
+    db.collection('categories').find().sort({ name: 1 }).toArray(),
+]);
+
+const taxonomies = {
+    speakers: speakersData.map((d: any) => ({ ...d, id: d._id.toString() })),
+    audio_types: audioTypesData.map((d: any) => ({ ...d, id: d._id.toString() })),
+    languages: languagesData.map((d: any) => ({ ...d, id: d._id.toString() })),
+    categories: categoriesData.map((d: any) => ({ ...d, id: d._id.toString() })),
+};
+
+// Gregorian Months in Urdu
+const gMonths = [
+    { value: 1, label: "جنوری" }, { value: 2, label: "فروری" }, { value: 3, label: "مارچ" },
+    { value: 4, label: "اپریل" }, { value: 5, label: "مئی" }, { value: 6, label: "جون" },
+    { value: 7, label: "جولائی" }, { value: 8, label: "اگست" }, { value: 9, label: "ستمبر" },
+    { value: 10, label: "اکتوبر" }, { value: 11, label: "نومبر" }, { value: 12, label: "دسمبر" }
+];
+
+// Hijri Months in Urdu
+const hMonths = [
+    { value: 1, label: "محرم" }, { value: 2, label: "صفر" }, { value: 3, label: "ربیع الاول" },
+    { value: 4, label: "ربیع الثانی" }, { value: 5, label: "جمادی الاولیٰ" }, { value: 6, label: "جمادی الاخریٰ" },
+    { value: 7, label: "رجب" }, { value: 8, label: "شعبان" }, { value: 9, label: "رمضان" },
+    { value: 10, label: "شوال" }, { value: 11, label: "ذی القعدہ" }, { value: 12, label: "ذی الحجہ" }
+];
+---
+
+<div class="font-urdu" dir="rtl">
+    <form id="upload-form" class="space-y-4">
+        <input type="hidden" name="id" id="form-content-id" value={contentId} />
+        <input type="hidden" name="existingAudioUrl" id="form-existing-audio" value={editData?.file_url} />
+        <input type="hidden" name="existingCoverUrl" id="form-existing-cover" value={editData?.cover_image_url} />
+
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8 border-b border-slate-100/50 pb-5">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/10 transition-transform hover:rotate-12">
+                    <Icon name="music" size={24} class="text-white" />
+                </div>
+                <div>
+                    <h2 class="text-3xl font-black text-slate-900 leading-none" id="form-title-h">{editData ? 'مواد کی تصحیح' : 'نیا مواد شامل کریں'}</h2>
+                    <p class="text-[11px] text-emerald-600 font-black uppercase tracking-[0.2em] mt-2 opacity-80">علمی آڈیو لائبریری کا اضافہ</p>
+                </div>
+            </div>
+            <button 
+                type="button" 
+                class="close-modal-btn w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:bg-white hover:text-red-500 hover:shadow-premium transition-all duration-300 group/close"
+                title="بند کریں"
+            >
+                <Icon name="x" size={24} class="group-hover/close:rotate-90 transition-transform duration-500" />
+            </button>
+        </div>
+
+        <!-- 1. Media Section (Top) -->
+        <div class="glass-premium p-4 pt-6 rounded-4xl border border-white/40 shadow-sm relative overflow-visible group/modal">
+            <div class="flex items-center gap-2 text-emerald-600 mb-6 mr-1">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                    <Icon name="image" size={16} />
+                </div>
+                <span class="font-black text-[18px]">تصویر اور آڈیو فائل</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <!-- Circular Cover Image -->
+                <div class="relative shrink-0 pt-7">
+                    <label class="absolute top-0 left-0 right-0 text-center text-[12px] font-black text-slate-400 uppercase tracking-widest">سرورق</label>
+                    <div class="w-24 h-24 rounded-full border-2 border-dashed border-emerald-500/30 flex flex-col items-center justify-center relative overflow-hidden group/cover hover:border-emerald-500 transition-all duration-500 bg-white/50 cursor-pointer">
+                        <input type="file" name="coverFile" id="cover-input" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
+                        
+                        {editData?.cover_image_url ? (
+                            <img src={editData.cover_image_url} id="cover-preview-img" class="absolute inset-0 w-full h-full object-cover z-0" />
+                        ) : (
+                            <img id="cover-preview-img" class="absolute inset-0 w-full h-full object-cover hidden z-0" />
+                        )}
+                        
+                        <div id="cover-placeholder" class={`flex flex-col items-center gap-1 z-10 transition-transform duration-500 group-hover/cover:scale-110 ${editData?.cover_image_url ? 'hidden' : ''}`}>
+                            <Icon name="upload" size={20} class="text-emerald-500" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rectangular Audio Upload -->
+                <div class="flex-1 relative pt-7">
+                    <label class="absolute top-0 right-6 text-[12px] font-black text-slate-400 uppercase tracking-widest">آڈیو فائل*</label>
+                    <div class="h-24 rounded-3xl border-2 border-dashed border-emerald-500/30 flex flex-col items-center justify-center relative group/audio hover:border-emerald-500 transition-all duration-500 bg-white/50 cursor-pointer">
+                        <input type="file" name="audioFile" accept="audio/*" required={!editData} class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
+                        
+                        <div class="flex flex-col items-center text-center z-10 w-full px-4">
+                            <p class="font-urdu font-black text-xl text-emerald-600 file-name-audio leading-[2.5] truncate w-full">
+                                {editData ? 'نیا آڈیو منتخب کریں' : 'آڈیو فائل منتخب کریں'}
+                            </p>
+                            <p class="file-info-audio font-black text-[11px] text-slate-400 uppercase tracking-widest mt-1">
+                                {editData?.file_size ? `${editData.file_size} ایم بی` : ''}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            /* Custom Animated Dropdown Styles */
+            .custom-select-container {
+                position: relative;
+                width: 100%;
+            }
+            .custom-select-trigger {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                height: 3.5rem;
+                padding: 0 1.25rem;
+                background: white;
+                border: 2px solid #f1f5f9; /* slate-100 */
+                border-radius: 1.25rem;
+                font-weight: 800;
+                font-size: 0.95rem;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+                color: #1e293b;
+            }
+            input.selected-text {
+                cursor: text;
+                padding: 0;
+                margin: 0;
+            }
+            .selected-text.is-placeholder::placeholder {
+                color: #94a3b8; /* Match slate-400 placeholder */
+            }
+            .custom-select-trigger:hover {
+                border-color: #10b981;
+                background: #fff;
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.1);
+            }
+            .custom-select-trigger:global(.active) {
+                border-color: #10b981;
+                background: #fff;
+                box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.1);
+            }
+            .custom-options {
+                position: absolute;
+                top: calc(100% + 8px);
+                left: 0;
+                right: 0;
+                background: #fff;
+                border: 1px solid rgba(16, 185, 129, 0.2);
+                border-radius: 1.25rem;
+                z-index: 100;
+                max-height: 280px;
+                overflow-y: auto;
+                opacity: 0;
+                visibility: hidden;
+                transform: translateY(10px);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                padding: 0.5rem;
+            }
+            .custom-options:global(.show) {
+                opacity: 1;
+                visibility: visible;
+                transform: translateY(0);
+            }
+            .custom-option {
+                padding: 0.75rem 1rem;
+                font-weight: 700;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: all 0.2s;
+                border-radius: 0.75rem;
+                color: #475569;
+                margin-bottom: 2px;
+            }
+            .custom-option:hover {
+                background: #f0fdf4;
+                color: #059669;
+                padding-right: 1.25rem;
+            }
+            .custom-option:global(.selected) {
+                background: #f0fdf4;
+                color: #059669;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .custom-option:global(.selected)::after {
+                content: '✓';
+                font-weight: 800;
+                margin-left: 8px;
+            }
+            .custom-option:global(.selected):hover {
+                background: #fef2f2;
+                color: #ef4444;
+            }
+            .custom-option:global(.selected):hover::after {
+                content: '✕';
+            }
+            .custom-option.clear-option {
+                color: #94a3b8;
+                font-size: 0.8rem;
+                border-bottom: 1px solid #f1f5f9;
+                margin-bottom: 4px;
+                display: none; /* Hidden by default */
+                align-items: center;
+                gap: 8px;
+            }
+            .custom-select-container.has-value .clear-option {
+                display: flex; /* Show only if value selected */
+            }
+            .custom-option.clear-option:hover {
+                background: #fef2f2;
+                color: #ef4444;
+            }
+            
+            /* New Search and Add Styles */
+            .dropdown-search-wrapper {
+                padding: 12px;
+                border-bottom: 1px solid #f1f5f9;
+                position: sticky;
+                top: 0;
+                background: white;
+                z-index: 20;
+            }
+            .search-input-container {
+                position: relative;
+                display: flex;
+                align-items: center;
+                background: #f8fafc;
+                border: 1.5px solid #f1f5f9;
+                border-radius: 12px;
+                padding: 0 12px;
+                transition: all 0.3s;
+            }
+            .search-input-container:focus-within {
+                border-color: #10b981;
+                background: white;
+                box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.05);
+            }
+            .search-input-container input {
+                width: 100%;
+                height: 40px;
+                background: transparent;
+                border: none;
+                outline: none;
+                font-weight: 700;
+                font-size: 0.9rem;
+                padding-right: 8px;
+            }
+            .add-new-option {
+                margin: 8px;
+                padding: 12px 16px;
+                background: #f1b434 !important; /* Gold/Yellow from image */
+                color: #1e293b;
+                border-radius: 14px;
+                font-weight: 800;
+                display: none;
+                align-items: center;
+                gap: 8px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .add-new-option:hover {
+                transform: scale(1.02);
+                box-shadow: 0 8px 15px -5px rgba(241, 180, 52, 0.4);
+            }
+            
+            .custom-select-trigger .arrow {
+                transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                color: #94a3b8;
+            }
+            .custom-select-trigger:global(.active) .arrow {
+                transform: rotate(180deg);
+                color: #10b981;
+            }
+
+            /* Scrollbar for options */
+            .custom-options::-webkit-scrollbar {
+                width: 4px;
+            }
+            .custom-options::-webkit-scrollbar-track {
+                background: #f1f5f9;
+            }
+            .custom-options::-webkit-scrollbar-thumb {
+                background: #10b981;
+                border-radius: 4px;
+            }
+
+            /* Fix Z-Index Stacking Context for sections within this form */
+            .glass-premium {
+                position: relative;
+            }
+            :global(.section-z-active) {
+                z-index: 50 !important;
+                position: relative;
+            }
+        </style>
+
+        <!-- 2. Basic Info -->
+        <div class="glass-premium p-4 rounded-4xl border border-white/40 shadow-sm space-y-4">
+            <div class="flex items-center gap-2 text-emerald-600">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                    <Icon name="file-text" size={16} />
+                </div>
+                <span class="font-black text-[18px]">بنیادی معلومات</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Title (Takes 2 columns) -->
+                <div class="md:col-span-2 group">
+                    <label class="block text-[12px] font-black text-slate-400 mb-1.5 uppercase tracking-widest mr-1 group-focus-within:text-emerald-500 transition-colors">عنوان*</label>
+                    <input 
+                        type="text" 
+                        name="title"
+                        required
+                        value={editData?.title || ''}
+                        class="w-full h-14 px-6 rounded-[1.25rem] bg-white border-2 border-slate-100 focus:border-emerald-500 transition-all outline-none font-black leading-14 shadow-sm focus:ring-4 focus:ring-emerald-500/10"
+                        placeholder="مواد کا عنوان درج کریں..."
+                    />
+                </div>
+
+                <div class="group">
+                    <label class="block text-[12px] font-black text-slate-400 mb-1.5 uppercase tracking-widest mr-1 group-focus-within:text-emerald-500 transition-colors">دورانیہ*</label>
+                    <div class="grid grid-cols-3 gap-2" dir="ltr">
+                        <div class="relative">
+                            <input 
+                                type="number" 
+                                name="durHours" 
+                                min="0" 
+                                max="99"
+                                required
+                                value={editData?.duration?.split(':')[0] || ''} 
+                                class="w-full h-14 px-2 rounded-[1.25rem] bg-white border-2 border-slate-100 focus:border-emerald-500 outline-none font-black text-center text-sm shadow-sm focus:ring-4 focus:ring-emerald-500/10" 
+                                placeholder="گھنٹہ" 
+                            />
+                        </div>
+                        <div class="relative">
+                            <input 
+                                type="number" 
+                                name="durMinutes" 
+                                min="0" 
+                                max="59" 
+                                required
+                                value={editData?.duration?.split(':')[1] || ''} 
+                                class="w-full h-14 px-2 rounded-[1.25rem] bg-white border-2 border-slate-100 focus:border-emerald-500 outline-none font-black text-center text-sm shadow-sm focus:ring-4 focus:ring-emerald-500/10" 
+                                placeholder="منٹ" 
+                            />
+                        </div>
+                        <div class="relative">
+                            <input 
+                                type="number" 
+                                name="durSeconds" 
+                                min="0" 
+                                max="59" 
+                                required
+                                value={editData?.duration?.split(':')[2] || ''} 
+                                class="w-full h-14 px-2 rounded-[1.25rem] bg-white border-2 border-slate-100 focus:border-emerald-500 outline-none font-black text-center text-sm shadow-sm focus:ring-4 focus:ring-emerald-500/10" 
+                                placeholder="سیکنڈ" 
+                            />
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+
+        <!-- 3. Category Section -->
+        <div class="glass-premium p-4 rounded-4xl border border-white/40 shadow-sm space-y-3">
+            <div class="flex items-center gap-2 text-emerald-600">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                    <Icon name="layers" size={16} />
+                </div>
+                <span class="font-black text-[18px]">درجہ بندی</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Custom Dropdown Row 1 -->
+                <div class="space-y-2">
+                    <label class="block text-[12px] font-black text-slate-400 mb-1.5 mr-1 uppercase tracking-widest">مقرر*</label>
+                    <div class={`custom-select-container ${editData?.speaker ? 'has-value' : ''}`} data-name="speaker">
+                        <div class="custom-select-trigger">
+                            <span class={`selected-text flex-1 ${!editData?.speaker ? 'is-placeholder' : ''}`}>{editData?.speaker || 'منتخب کریں...'}</span>
+                            <Icon name="chevron-down" size={16} class="arrow text-slate-400 shrink-0" />
+                        </div>
+                        <div class="custom-options no-scrollbar">
+                            <div class="dropdown-search-wrapper">
+                                <div class="search-input-container">
+                                    <Icon name="search" size={16} class="text-slate-400" />
+                                    <input type="text" placeholder="تلاش..." class="dropdown-search-field" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="options-list-scroll no-scrollbar max-h-60 overflow-y-auto">
+                                <div class="custom-option clear-option" data-value="">
+                                    <Icon name="x" size={12} />
+                                    <span>خالی کریں</span>
+                                </div>
+                                {taxonomies.speakers.map(s => <div class="custom-option" data-value={s.name}>{s.name}</div>)}
+                            </div>
+                            <div class="add-new-option" data-action="add-new">
+                                <Icon name="plus" size={18} />
+                                <span>شامل کریں "<span class="new-val"></span>"</span>
+                            </div>
+                        </div>
+                        <input type="hidden" name="speaker" value={editData?.speaker || ''} required />
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-[12px] font-black text-slate-400 mb-1.5 mr-1 uppercase tracking-widest">آڈیو کی قسم*</label>
+                    <div class={`custom-select-container ${editData?.audio_type ? 'has-value' : ''}`} data-name="audioType">
+                        <div class="custom-select-trigger">
+                            <span class={`selected-text flex-1 ${!editData?.audio_type ? 'is-placeholder' : ''}`}>{editData?.audio_type || 'منتخب کریں...'}</span>
+                            <Icon name="chevron-down" size={16} class="arrow text-slate-400 shrink-0" />
+                        </div>
+                        <div class="custom-options no-scrollbar">
+                            <div class="dropdown-search-wrapper">
+                                <div class="search-input-container">
+                                    <Icon name="search" size={16} class="text-slate-400" />
+                                    <input type="text" placeholder="تلاش..." class="dropdown-search-field" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="options-list-scroll no-scrollbar max-h-60 overflow-y-auto">
+                                <div class="custom-option clear-option" data-value="">
+                                    <Icon name="x" size={12} />
+                                    <span>خالی کریں</span>
+                                </div>
+                                {taxonomies.audio_types.map(at => <div class="custom-option" data-value={at.name}>{at.name}</div>)}
+                            </div>
+                            <div class="add-new-option" data-action="add-new">
+                                <Icon name="plus" size={18} />
+                                <span>شامل کریں "<span class="new-val"></span>"</span>
+                            </div>
+                        </div>
+                        <input type="hidden" name="audioType" value={editData?.audio_type || ''} required />
+                    </div>
+                </div>
+
+                <!-- Custom Dropdown Row 2 -->
+                <div class="space-y-2">
+                    <label class="block text-[12px] font-black text-slate-400 mb-1.5 mr-1 uppercase tracking-widest">زمرہ</label>
+                    <div class={`custom-select-container ${editData?.categories?.length ? 'has-value' : ''}`} data-name="categories" data-multiple="true">
+                        <div class="custom-select-trigger">
+                            <span class={`selected-text flex-1 ${(editData?.categories?.length === 0 || !editData?.categories) ? 'is-placeholder' : ''}`}>
+                                {editData?.categories?.length > 0 ? editData.categories.join('، ') : 'منتخب کریں...'}
+                            </span>
+                            <Icon name="chevron-down" size={16} class="arrow text-slate-400 shrink-0" />
+                        </div>
+                        <div class="custom-options no-scrollbar">
+                            <div class="dropdown-search-wrapper">
+                                <div class="search-input-container">
+                                    <Icon name="search" size={16} class="text-slate-400" />
+                                    <input type="text" placeholder="تلاش..." class="dropdown-search-field" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="options-list-scroll no-scrollbar max-h-60 overflow-y-auto">
+                                <div class="custom-option clear-option" data-value="">
+                                    <Icon name="x" size={12} />
+                                    <span>خالی کریں</span>
+                                </div>
+                                {taxonomies.categories.map(c => <div class="custom-option" data-value={c.name}>{c.name}</div>)}
+                            </div>
+                            <div class="add-new-option" data-action="add-new">
+                                <Icon name="plus" size={18} />
+                                <span>شامل کریں "<span class="new-val"></span>"</span>
+                            </div>
+                        </div>
+                        <input type="hidden" name="categories" value={editData?.categories?.join(',') || ''} />
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-[12px] font-black text-slate-400 mb-1.5 mr-1 uppercase tracking-widest">زبان*</label>
+                    <div class={`custom-select-container ${editData?.language ? 'has-value' : ''}`} data-name="language">
+                        <div class="custom-select-trigger">
+                            <span class={`selected-text flex-1 ${!editData?.language ? 'is-placeholder' : ''}`}>{editData?.language || 'منتخب کریں...'}</span>
+                            <Icon name="chevron-down" size={16} class="arrow text-slate-400 shrink-0" />
+                        </div>
+                        <div class="custom-options no-scrollbar">
+                            <div class="dropdown-search-wrapper">
+                                <div class="search-input-container">
+                                    <Icon name="search" size={16} class="text-slate-400" />
+                                    <input type="text" placeholder="تلاش..." class="dropdown-search-field" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="options-list-scroll no-scrollbar max-h-60 overflow-y-auto">
+                                <div class="custom-option clear-option" data-value="">
+                                    <Icon name="x" size={12} />
+                                    <span>خالی کریں</span>
+                                </div>
+                                {taxonomies.languages.map(l => <div class="custom-option" data-value={l.name}>{l.name}</div>)}
+                            </div>
+                            <div class="add-new-option" data-action="add-new">
+                                <Icon name="plus" size={18} />
+                                <span>شامل کریں "<span class="new-val"></span>"</span>
+                            </div>
+                        </div>
+                        <input type="hidden" name="language" value={editData?.language || ''} required />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Location Section -->
+        <div class="glass-premium p-4 rounded-4xl border border-white/40 shadow-sm space-y-3">
+            <div class="flex items-center gap-2 text-emerald-600">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                    <Icon name="map-pin" size={16} />
+                </div>
+                <span class="font-black text-[18px]">مقام / جگہ</span>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="space-y-1.5">
+                    <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mr-1 mb-1.5">ضلع</label>
+                    <input type="text" name="venueDistrict" class="w-full h-14 leading-14 px-5 rounded-[1.25rem] bg-white border-2 border-slate-100 focus:border-emerald-500 font-bold text-sm outline-none shadow-sm transition-all focus:ring-4 focus:ring-emerald-500/10" value={editData?.venue?.split(', ')[0] || ''} placeholder="ضلع..." />
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mr-1 mb-1.5">تحصیل</label>
+                    <input type="text" name="venueTehsil" class="w-full h-14 leading-14 px-5 rounded-[1.25rem] bg-white border-2 border-slate-100 focus:border-emerald-500 font-bold text-sm outline-none shadow-sm transition-all focus:ring-4 focus:ring-emerald-500/10" value={editData?.venue?.split(', ')[1] || ''} placeholder="تحصیل..." />
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mr-1 mb-1.5">شہر</label>
+                    <input type="text" name="venueCity" class="w-full h-14 leading-14 px-5 rounded-[1.25rem] bg-white border-2 border-slate-100 focus:border-emerald-500 font-bold text-sm outline-none shadow-sm transition-all focus:ring-4 focus:ring-emerald-500/10" value={editData?.venue?.split(', ')[2] || ''} placeholder="شہر..." />
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mr-1 mb-1.5">علاقہ</label>
+                    <input type="text" name="venueArea" class="w-full h-14 leading-14 px-5 rounded-[1.25rem] bg-white border-2 border-slate-100 focus:border-emerald-500 font-bold text-sm outline-none shadow-sm transition-all focus:ring-4 focus:ring-emerald-500/10" value={editData?.venue?.split(', ')[3] || ''} placeholder="علاقہ..." />
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Dates Section -->
+        <div class="glass-premium p-4 rounded-4xl border border-white/40 shadow-sm space-y-4">
+            <div class="flex items-center gap-2 text-emerald-600 mb-1">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                    <Icon name="calendar" size={16} />
+                </div>
+                <span class="font-black text-[18px]">تاریخ منتخب کریں</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <!-- Hijri Date -->
+                <div class="space-y-2">
+                    <label class="block text-[12px] font-black text-slate-400 mb-1.5 mr-1 uppercase tracking-widest">ہجری تاریخ</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class={`custom-select-container ${editData?.hijri_date_day ? 'has-value' : ''}`} data-name="hDay">
+                            <div class="custom-select-trigger px-4 rounded-[1.25rem] border-2 border-slate-100 text-sm shadow-sm">
+                                <span class={`selected-text ${!editData?.hijri_date_day ? 'is-placeholder' : ''}`}>{editData?.hijri_date_day || 'تاریخ'}</span>
+                                <Icon name="chevron-down" size={12} class="arrow text-slate-300" />
+                            </div>
+                            <div class="custom-options no-scrollbar rounded-xl!">
+                                <div class="custom-option clear-option py-1! px-3!" data-value="">
+                                    <Icon name="x" size={10} />
+                                    <span>خالی کریں</span>
+                                </div>
+                                {Array.from({length: 30}, (_, i) => <div class="custom-option py-2! px-3!" data-value={i+1}>{i+1}</div>)}
+                            </div>
+                            <input type="hidden" name="hDay" value={editData?.hijri_date_day || ''} />
+                        </div>
+                        <div class={`custom-select-container ${editData?.hijri_date_month ? 'has-value' : ''}`} data-name="hMonth">
+                            <div class="custom-select-trigger px-3 rounded-[1.25rem] border-2 border-slate-100 text-[11px] shadow-sm">
+                                <span class={`selected-text ${!editData?.hijri_date_month ? 'is-placeholder' : ''}`}>{hMonths.find(m => Number(editData?.hijri_date_month) == m.value)?.label || 'مہینہ'}</span>
+                                <Icon name="chevron-down" size={10} class="arrow text-slate-300" />
+                            </div>
+                            <div class="custom-options no-scrollbar rounded-xl!">
+                                <div class="custom-option clear-option py-1! px-2!" data-value="">
+                                    <Icon name="x" size={10} />
+                                    <span>خالی کریں</span>
+                                </div>
+                                {hMonths.map(m => <div class="custom-option py-2! px-2!" data-value={m.value}>{m.label}</div>)}
+                            </div>
+                            <input type="hidden" name="hMonth" value={editData?.hijri_date_month || ''} />
+                        </div>
+                        <input type="number" name="hYear" placeholder="سال" class="h-14 px-5 rounded-[1.25rem] bg-white border-2 border-slate-100 text-sm font-black text-center outline-none shadow-sm focus:border-emerald-500 transition-all focus:ring-4 focus:ring-emerald-500/10" value={editData?.hijri_date_year || ''} />
+                    </div>
+                </div>
+
+                <!-- Gregorian Date -->
+                <div class="space-y-2">
+                    <label class="block text-[12px] font-black text-slate-400 mb-1.5 mr-1 uppercase tracking-widest">عیسوی تاریخ</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class={`custom-select-container ${editData?.lecture_date_gregorian?.split('-')[2] ? 'has-value' : ''}`} data-name="gDay">
+                            <div class="custom-select-trigger px-4 rounded-[1.25rem] border-2 border-slate-100 text-sm shadow-sm">
+                                <span class={`selected-text ${!editData?.lecture_date_gregorian?.split('-')[2] ? 'is-placeholder' : ''}`}>{editData?.lecture_date_gregorian?.split('-')[2] || 'تاریخ'}</span>
+                                <Icon name="chevron-down" size={12} class="arrow text-slate-300" />
+                            </div>
+                            <div class="custom-options no-scrollbar rounded-xl!">
+                                <div class="custom-option clear-option py-1! px-3!" data-value="">
+                                    <Icon name="x" size={10} />
+                                    <span>خالی کریں</span>
+                                </div>
+                                {Array.from({length: 31}, (_, i) => <div class="custom-option py-2! px-3!" data-value={i+1}>{i+1}</div>)}
+                            </div>
+                            <input type="hidden" name="gDay" value={editData?.lecture_date_gregorian?.split('-')[2] || ''} />
+                        </div>
+                        <div class={`custom-select-container ${editData?.lecture_date_gregorian?.split('-')[1] ? 'has-value' : ''}`} data-name="gMonth">
+                            <div class="custom-select-trigger px-3 rounded-[1.25rem] border-2 border-slate-100 text-[11px] shadow-sm">
+                                <span class={`selected-text ${!editData?.lecture_date_gregorian?.split('-')[1] ? 'is-placeholder' : ''}`}>{gMonths.find(m => editData?.lecture_date_gregorian?.split('-')[1] == m.value)?.label || 'مہینہ'}</span>
+                                <Icon name="chevron-down" size={10} class="arrow text-slate-300" />
+                            </div>
+                            <div class="custom-options no-scrollbar rounded-xl!">
+                                <div class="custom-option clear-option py-1! px-2!" data-value="">
+                                    <Icon name="x" size={10} />
+                                    <span>خالی کریں</span>
+                                </div>
+                                {gMonths.map(m => <div class="custom-option py-2! px-2!" data-value={m.value}>{m.label}</div>)}
+                            </div>
+                            <input type="hidden" name="gMonth" value={editData?.lecture_date_gregorian?.split('-')[1] || ''} />
+                        </div>
+                        <input type="number" name="gYear" placeholder="سال" class="h-14 px-5 rounded-[1.25rem] bg-white border-2 border-slate-100 text-sm font-black text-center outline-none shadow-sm focus:border-emerald-500 transition-all focus:ring-4 focus:ring-emerald-500/10" value={editData?.lecture_date_gregorian?.split('-')[0] || ''} />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-3 pt-6 pb-2 border-t border-slate-100 mt-2">
+            <button type="button" class="close-modal-btn px-6 py-3 rounded-2xl bg-white border border-slate-100 text-slate-400 font-black text-xs hover:bg-slate-50 transition-all">
+                بند کریں
+            </button>
+            <button 
+                type="submit" 
+                id="submit-btn"
+                class="px-12 py-3.5 rounded-2xl bg-emerald-500 text-white font-black text-base shadow-xl shadow-emerald-500/25 hover:bg-emerald-600 hover:-translate-y-1 active:scale-95 transition-all flex items-center gap-3 disabled:opacity-50"
+            >
+                <div id="btn-content" class="flex items-center gap-3">
+                    <Icon name="upload" size={20} />
+                    <span id="btn-text">{editData ? 'محفوظ کریں' : 'اپ لوڈ شروع کریں'}</span>
+                </div>
+                <div id="btn-loader" class="hidden">
+                    <div class="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+                </div>
+            </button>
+        </div>
+    </form>
+</div>
+
+<script is:inline define:vars={{ audioTypes: taxonomies.audio_types, speakers: taxonomies.speakers }}>
+    (function() {
+        function initForm() {
+            const form = document.getElementById('upload-form');
+            if (!form || form._initialized) return;
+            form._initialized = true;
+
+            const submitBtn = document.getElementById('submit-btn');
+            const btnContent = document.getElementById('btn-content');
+            const btnLoader = document.getElementById('btn-loader');
+            
+            function formatBytes(bytes, decimals = 2) {
+                if (bytes === 0) return '';
+                const k = 1024;
+                const dm = decimals < 0 ? 0 : decimals;
+                const sizes = ['بائٹس', 'کے بی', 'ایم بی', 'جی بی', 'ٹی بی'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            }
+
+            // --- Custom Dropdown Logic ---
+            const dropdowns = form.querySelectorAll('.custom-select-container');
+            
+            function updateSelectedText(container, text, isPlaceholder = false) {
+                const textSpan = container.querySelector('.selected-text');
+                if (textSpan) {
+                    if (textSpan.tagName === 'INPUT') {
+                        textSpan.value = text;
+                        if (isPlaceholder) textSpan.classList.add('is-placeholder');
+                        else textSpan.classList.remove('is-placeholder');
+                    } else {
+                        textSpan.textContent = text;
+                        if (isPlaceholder) textSpan.classList.add('is-placeholder');
+                        else textSpan.classList.remove('is-placeholder');
+                    }
+                }
+            }
+
+            function setDropdownValue(container, value, text, isAbsolute = false) {
+                const isMultiple = container.getAttribute('data-multiple') === 'true';
+                const input = container.querySelector('input[type="hidden"]');
+                
+                if (isMultiple) {
+                    let currentValues = (input.value && !isAbsolute) ? input.value.split(',').filter(v => v.trim() !== '') : [];
+                    
+                    if (isAbsolute) {
+                        currentValues = Array.isArray(value) ? value : (value ? value.toString().split(',') : []);
+                    } else if (value === "") {
+                        currentValues = [];
+                    } else {
+                        const index = currentValues.indexOf(value);
+                        if (index > -1) currentValues.splice(index, 1);
+                        else currentValues.push(value);
+                    }
+                    
+                    const newValueString = currentValues.join(',');
+                    if (input) {
+                        input.value = newValueString;
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    
+                    if (currentValues.length === 0) {
+                        updateSelectedText(container, 'منتخب کریں...', true);
+                        container.classList.remove('has-value');
+                    } else {
+                        updateSelectedText(container, currentValues.join('، '), false);
+                        container.classList.add('has-value');
+                    }
+
+                    container.querySelectorAll('.custom-option:not(.clear-option)').forEach(opt => {
+                        const optVal = opt.getAttribute('data-value');
+                        if (currentValues.includes(optVal)) opt.classList.add('selected');
+                        else opt.classList.remove('selected');
+                    });
+                } else {
+                    if (input) {
+                        input.value = value;
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+
+                    // If unselecting (clearing), restore original placeholder text based on data-name
+                    if (!value) {
+                        const name = container.getAttribute('data-name');
+                        let defaultText = 'منتخب کریں...';
+                        if (name === 'hDay' || name === 'gDay') defaultText = 'تاریخ';
+                        updateSelectedText(container, defaultText, true);
+                        container.classList.remove('has-value');
+                    } else {
+                        updateSelectedText(container, text, false);
+                        container.classList.add('has-value');
+                    }
+                    
+                    // Close dropdown
+                    const trigger = container.querySelector('.custom-select-trigger');
+                    const options = container.querySelector('.custom-options');
+                    if (trigger) trigger.classList.remove('active');
+                    if (options) {
+                        options.classList.remove('show');
+                        options.querySelectorAll('.custom-option.hidden').forEach(el => el.classList.remove('hidden'));
+                        const internalSearch = options.querySelector('.dropdown-search-field');
+                        if (internalSearch) internalSearch.value = '';
+                        const addNewBtn = options.querySelector('.add-new-option');
+                        if (addNewBtn) addNewBtn.style.display = 'none';
+                    }
+                }
+            }
+
+            // Handle search/type in dropdowns
+            dropdowns.forEach(container => {
+                const searchInput = container.querySelector('.dropdown-search-field');
+                const optionsList = container.querySelector('.custom-options');
+                const addNewBtn = container.querySelector('.add-new-option');
+                const newValSpan = addNewBtn?.querySelector('.new-val');
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', (e) => {
+                        const search = e.target.value.trim().toLowerCase();
+                        let matchFound = false;
+                        
+                        // Filter standard options
+                        const items = container.querySelectorAll('.custom-option:not(.clear-option):not(.add-new-option)');
+                        items.forEach(item => {
+                            const text = item.textContent.trim().toLowerCase();
+                            if (text.includes(search)) {
+                                item.classList.remove('hidden');
+                                if (text === search) matchFound = true;
+                            } else {
+                                item.classList.add('hidden');
+                            }
+                        });
+
+                        // Handle "Add New" visibility and text
+                        if (search.length > 0 && !matchFound && addNewBtn && newValSpan) {
+                            newValSpan.textContent = e.target.value;
+                            addNewBtn.style.display = 'flex';
+                        } else if (addNewBtn) {
+                            addNewBtn.style.display = 'none';
+                        }
+                    });
+
+                    // Add new option on click
+                    addNewBtn?.addEventListener('click', () => {
+                        const val = searchInput.value.trim();
+                        if (val) {
+                            setDropdownValue(container, val, val);
+                        }
+                    });
+                }
+            });
+
+            // Centralized click handler for dropdowns to avoid multiple listeners
+            function handleDropdownClick(e) {
+                const container = e.target.closest('.custom-select-container');
+                const trigger = e.target.closest('.custom-select-trigger');
+                const option = e.target.closest('.custom-option');
+
+                if (trigger) {
+                    e.stopPropagation();
+                    const options = container.querySelector('.custom-options');
+                    const parentSection = container.closest('.glass-premium');
+                    
+                    // Close others
+                    document.querySelectorAll('.custom-options.show').forEach(el => {
+                        if (el !== options) el.classList.remove('show');
+                    });
+                    document.querySelectorAll('.custom-select-trigger.active').forEach(el => {
+                        if (el !== trigger) el.classList.remove('active');
+                    });
+                    document.querySelectorAll('.section-z-active').forEach(el => {
+                        if (el !== parentSection) el.classList.remove('section-z-active');
+                    });
+
+                    const isActive = trigger.classList.toggle('active');
+                    options.classList.toggle('show');
+                    
+                    if (isActive && options) {
+                        const internalSearch = options.querySelector('.dropdown-search-field');
+                        if (internalSearch) {
+                            setTimeout(() => internalSearch.focus(), 100);
+                        }
+                    }
+
+                    if (parentSection) {
+                        parentSection.classList.toggle('section-z-active', isActive);
+                    }
+                    return;
+                }
+
+                if (option) {
+                    e.stopPropagation();
+                    const container = option.closest('.custom-select-container');
+                    const isMultiple = container.getAttribute('data-multiple') === 'true';
+                    const val = option.getAttribute('data-value');
+                    const text = option.textContent;
+                    setDropdownValue(container, val, text);
+                    
+                    if (!isMultiple) {
+                        const parentSection = container.closest('.glass-premium');
+                        if (parentSection) parentSection.classList.remove('section-z-active');
+                    }
+                    return;
+                }
+
+                // Close all if clicking outside
+                document.querySelectorAll('.custom-options.show').forEach(el => el.classList.remove('show'));
+                document.querySelectorAll('.custom-select-trigger.active').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.section-z-active').forEach(el => el.classList.remove('section-z-active'));
+            }
+
+            // Remove existing listener if any and add new one
+            if (form._dropdownHandler) {
+                document.removeEventListener('click', form._dropdownHandler);
+            }
+            form._dropdownHandler = handleDropdownClick;
+            document.addEventListener('click', handleDropdownClick);
+
+            // --- Speaker/AudioType Interdependency ---
+            const speakerInput = form.querySelector('input[name="speaker"]');
+            const audioTypeContainer = form.querySelector('.custom-select-container[data-name="audioType"]');
+            const audioTypeScroll = audioTypeContainer?.querySelector('.options-list-scroll');
+
+            speakerInput?.addEventListener('change', () => {
+                const selectedSpeakerName = speakerInput.value;
+                const speaker = speakers.find(s => s.name === selectedSpeakerName);
+                
+                // Clear audio type
+                setDropdownValue(audioTypeContainer, '', 'منتخب کریں...');
+                
+                if (audioTypeScroll) {
+                    const clearOption = audioTypeScroll.querySelector('.clear-option');
+                    const astroScopeAttr = Array.from(clearOption?.attributes || []).find(attr => attr.name.startsWith('data-astro-cid-'))?.name;
+                    
+                    audioTypeScroll.innerHTML = '';
+                    if (clearOption) audioTypeScroll.appendChild(clearOption);
+                    
+                    if (speaker) {
+                        const filteredTypes = audioTypes.filter(at => at.speaker_id === speaker.id);
+                        filteredTypes.forEach(at => {
+                            const div = document.createElement('div');
+                            div.className = 'custom-option';
+                            if (astroScopeAttr) div.setAttribute(astroScopeAttr, '');
+                            div.setAttribute('data-value', at.name);
+                            div.textContent = at.name;
+                            audioTypeScroll.appendChild(div);
+                        });
+                    }
+                }
+            });
+
+            // --- File inputs and previews ---
+            const audioInput = form.querySelector('input[name="audioFile"]');
+            const coverInput = document.getElementById('cover-input');
+            const audioNameLabel = form.querySelector('.file-name-audio');
+            const audioInfoLabel = form.querySelector('.file-info-audio');
+            const coverPreviewImg = document.getElementById('cover-preview-img');
+            const coverPlaceholder = document.getElementById('cover-placeholder');
+
+            audioInput?.addEventListener('change', () => {
+                const file = audioInput.files?.[0];
+                if (file) {
+                    audioNameLabel.textContent = file.name;
+                    audioInfoLabel.textContent = formatBytes(file.size);
+
+                    const titleInput = form.querySelector('input[name="title"]');
+                    if (titleInput) {
+                        const newTitle = file.name.split('.').slice(0, -1).join('.').replace(/_/g, ' ').replace(/-/g, ' ');
+                        titleInput.value = newTitle;
+                    }
+
+                    // Extract Duration
+                    const audio = new Audio();
+                    audio.preload = 'metadata';
+                    audio.onloadedmetadata = function() {
+                        const duration = audio.duration;
+                        if (isNaN(duration) || duration === Infinity) return;
+
+                        const hours = Math.floor(duration / 3600);
+                        const minutes = Math.floor((duration % 3600) / 60);
+                        const seconds = Math.floor(duration % 60);
+                        
+                        const hInput = form.querySelector('input[name="durHours"]');
+                        const mInput = form.querySelector('input[name="durMinutes"]');
+                        const sInput = form.querySelector('input[name="durSeconds"]');
+                        
+                        if (hInput) hInput.value = hours.toString().padStart(2, '0');
+                        if (mInput) mInput.value = minutes.toString().padStart(2, '0');
+                        if (sInput) sInput.value = seconds.toString().padStart(2, '0');
+                        
+                        URL.revokeObjectURL(audio.src);
+                    };
+
+                    audio.src = URL.createObjectURL(file);
+                }
+            });
+
+
+            coverInput?.addEventListener('change', () => {
+                const file = coverInput.files?.[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        if (coverPreviewImg && e.target?.result) {
+                            coverPreviewImg.src = e.target.result;
+                            coverPreviewImg.classList.remove('hidden');
+                            coverPlaceholder?.classList.add('hidden');
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const title = form.querySelector('input[name="title"]').value;
+                if (!title) {
+                    if (window.showToast) window.showToast("براہ کرم عنوان درج کریں۔", "error");
+                    return;
+                }
+
+                const formData = new FormData(form);
+                
+                // Use the Background Upload Manager
+                if (window.startBackgroundUpload) {
+                    window.startBackgroundUpload(formData, title);
+                    
+                    // Immediately notify and close modal
+                    if (window.showToast) window.showToast("اپ لوڈنگ شروع ہو رہی ہے... آپ پینل کا استعمال جاری رکھ سکتے ہیں۔", "info");
+                    
+                    const event = new CustomEvent('content-saved', { detail: { background: true } });
+                    document.dispatchEvent(event);
+                } else {
+                    // Fallback to standard fetch if manager not loaded
+                    console.warn('Background Upload Manager not available, falling back to standard fetch');
+                    
+                    btnContent?.classList.add('hidden');
+                    btnLoader?.classList.remove('hidden');
+                    submitBtn.disabled = true;
+
+                    try {
+                        const response = await fetch('/api/admin/upload-content', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (response.ok) {
+                            if (window.showToast) window.showToast("معلومات کامیابی سے محفوظ کر لی گئی ہیں۔", "success");
+                            const event = new CustomEvent('content-saved', { detail: { success: true } });
+                            document.dispatchEvent(event);
+                        } else {
+                            const errorText = await response.text();
+                            if (window.showToast) window.showToast(errorText || "محفوظ کرنے میں خرابی پیش آگئی۔", "error");
+                            btnContent?.classList.remove('hidden');
+                            btnLoader?.classList.add('hidden');
+                            submitBtn.disabled = false;
+                        }
+                    } catch (err) {
+                        if (window.showToast) window.showToast("سسٹم میں خرابی۔", "error");
+                        btnContent?.classList.remove('hidden');
+                        btnLoader?.classList.add('hidden');
+                        submitBtn.disabled = false;
+                    }
+                }
+            });
+
+            // --- Populate form for editing ---
+            window.populateContentForm = (data) => {
+                form.reset();
+                document.getElementById('form-title-h').textContent = 'معلومات کی تصحیح';
+                document.getElementById('btn-text').textContent = 'تبدیلیاں محفوظ کریں';
+                
+                audioNameLabel.textContent = 'نیا آڈیو منتخب کریں';
+                audioInfoLabel.textContent = data.file_size ? `${data.file_size} ایم بی` : 'موجودہ آڈیو موجود ہے';
+
+                document.getElementById('form-content-id').value = data.id || '';
+                document.getElementById('form-existing-audio').value = data.file_url || '';
+                document.getElementById('form-existing-cover').value = data.cover_image_url || '';
+
+                form.querySelector('input[name="title"]').value = data.title || '';
+
+
+                
+                // Custom Dropdowns
+                setDropdownValue(form.querySelector('[data-name="language"]'), data.language || '', data.language || 'منتخب کریں...');
+                setDropdownValue(form.querySelector('[data-name="speaker"]'), data.speaker || '', data.speaker || 'منتخب کریں...');
+                
+                // Speaker/AudioType Logic update
+                const speaker = speakers.find(s => s.name === data.speaker);
+                const audioTypeScroll = form.querySelector('.custom-select-container[data-name="audioType"] .options-list-scroll');
+                if (speaker && audioTypeScroll) {
+                    const clearOption = audioTypeScroll.querySelector('.clear-option');
+                    const astroScopeAttr = Array.from(clearOption?.attributes || []).find(attr => attr.name.startsWith('data-astro-cid-'))?.name;
+                    
+                    audioTypeScroll.innerHTML = '';
+                    if (clearOption) audioTypeScroll.appendChild(clearOption);
+                    
+                    const filteredTypes = audioTypes.filter(at => at.speaker_id === speaker.id);
+                    filteredTypes.forEach(at => {
+                        const div = document.createElement('div');
+                        div.className = 'custom-option';
+                        if (astroScopeAttr) div.setAttribute(astroScopeAttr, '');
+                        div.setAttribute('data-value', at.name);
+                        div.textContent = at.name;
+                        audioTypeScroll.appendChild(div);
+                    });
+                }
+                setDropdownValue(form.querySelector('[data-name="audioType"]'), data.audio_type || '', data.audio_type || 'منتخب کریں...');
+                setDropdownValue(form.querySelector('[data-name="categories"]'), data.categories || [], null, true);
+
+                // Venue
+                if (data.venue) {
+                    const [d, t, c, a] = data.venue.split(', ');
+                    form.querySelector('input[name="venueDistrict"]').value = d || '';
+                    form.querySelector('input[name="venueTehsil"]').value = t || '';
+                    form.querySelector('input[name="venueCity"]').value = c || '';
+                    form.querySelector('input[name="venueArea"]').value = a || '';
+                }
+
+
+                if (data.lecture_date_gregorian) {
+                    const [y, m, d] = data.lecture_date_gregorian.split('-');
+                    form.querySelector('input[name="gYear"]').value = y || '';
+                    setDropdownValue(form.querySelector('[data-name="gMonth"]'), parseInt(m) || '', parseInt(m) ? gMonths.find(gm => gm.value == parseInt(m))?.label : 'مہینہ');
+                    setDropdownValue(form.querySelector('[data-name="gDay"]'), parseInt(d) || '', parseInt(d) || 'تاریخ');
+                }
+
+                if (data.duration) {
+                    const [h, m, s] = data.duration.split(':');
+                    form.querySelector('input[name="durHours"]').value = h || '';
+                    form.querySelector('input[name="durMinutes"]').value = m || '';
+                    form.querySelector('input[name="durSeconds"]').value = s || '';
+                } else {
+                    form.querySelector('input[name="durHours"]').value = '';
+                    form.querySelector('input[name="durMinutes"]').value = '';
+                    form.querySelector('input[name="durSeconds"]').value = '';
+                }
+
+
+
+                if (data.hijri_date_year) form.querySelector('input[name="hYear"]').value = data.hijri_date_year;
+                setDropdownValue(form.querySelector('[data-name="hDay"]'), data.hijri_date_day || '', data.hijri_date_day || 'تاریخ');
+                setDropdownValue(form.querySelector('[data-name="hMonth"]'), data.hijri_date_month || '', data.hijri_date_month ? hMonths.find(hm => hm.value == data.hijri_date_month)?.label : 'مہینہ');
+
+                if (data.cover_image_url) {
+                    coverPreviewImg.src = data.cover_image_url;
+                    coverPreviewImg.classList.remove('hidden');
+                    coverPlaceholder?.classList.add('hidden');
+                } else {
+                    coverPreviewImg.classList.add('hidden');
+                    coverPlaceholder?.classList.remove('hidden');
+                }
+
+                form.querySelector('input[name="audioFile"]').required = false;
+            };
+
+            window.resetContentForm = () => {
+                form.reset();
+                document.getElementById('form-title-h').textContent = 'نیا مواد شامل کریں';
+                document.getElementById('btn-text').textContent = 'اپ لوڈ شروع کریں';
+                audioNameLabel.textContent = 'آڈیو فائل منتخب کریں';
+                audioInfoLabel.textContent = '';
+                
+                document.getElementById('form-content-id').value = '';
+                document.getElementById('form-existing-audio').value = '';
+                document.getElementById('form-existing-cover').value = '';
+                
+                form.querySelector('input[name="durHours"]').value = '';
+                form.querySelector('input[name="durMinutes"]').value = '';
+                form.querySelector('input[name="durSeconds"]').value = '';
+
+
+                
+                dropdowns.forEach(container => {
+                    const name = container.getAttribute('data-name');
+                    let defaultText = 'منتخب کریں...';
+                    if (name === 'hMonth' || name === 'gMonth') defaultText = 'مہینہ';
+                    if (name === 'hDay' || name === 'gDay') defaultText = 'تاریخ';
+                    setDropdownValue(container, '', defaultText, true);
+                });
+
+                coverPreviewImg.classList.add('hidden');
+                coverPlaceholder?.classList.remove('hidden');
+                form.querySelector('input[name="audioFile"]').required = true;
+                
+                btnContent?.classList.remove('hidden');
+                btnLoader?.classList.add('hidden');
+                submitBtn.disabled = false;
+            };
+        }
+
+        initForm();
+        document.addEventListener('astro:page-load', initForm);
+    })();
+</script>

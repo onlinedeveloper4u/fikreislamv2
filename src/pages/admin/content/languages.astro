@@ -1,0 +1,16 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import TaxonomyManager from '../../../modules/admin/components/TaxonomyManager.astro';
+
+const search = Astro.url.searchParams.get('search') || '';
+---
+
+<AdminLayout title="زبانوں کا انتظام — فکر اسلام" active="languages">
+  <TaxonomyManager 
+    table="languages" 
+    title="زبانیں" 
+    icon="globe" 
+    placeholder="زبان کا نام درج کریں..."
+    search={search}
+  />
+</AdminLayout>

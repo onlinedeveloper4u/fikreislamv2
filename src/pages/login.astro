@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import LoginForm from '../modules/auth/components/LoginForm.astro';
+---
+
+<BaseLayout title="لاگ ان — فکر اسلام" showNav={false} showFooter={false}>
+  <div class="min-h-screen flex items-center justify-center p-4 bg-slate-50 relative overflow-hidden">
+    <!-- Background Accents -->
+    <div class="absolute top-0 left-0 w-full h-full pointer-events-none -z-10">
+      <div class="absolute -top-[10%] -right-[10%] w-[40%] h-[40%] bg-emerald-500/5 rounded-full blur-[100px] animate-blob"></div>
+      <div class="absolute -bottom-[10%] -left-[10%] w-[40%] h-[40%] bg-emerald-600/5 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
+    </div>
+
+    <LoginForm />
+  </div>
+</BaseLayout>

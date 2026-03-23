@@ -1,0 +1,117 @@
+---
+// src/components/shared/Modal.astro
+import Icon from './Icon.astro';
+
+interface Props {
+    id: string;
+    title: string;
+    description?: string;
+    confirmText?: string;
+    cancelText?: string;
+    type?: 'danger' | 'success' | 'info';
+}
+
+const { 
+    id, 
+    title, 
+    description = 'کیا آپ واقعی اس عمل کو جاری رکھنا چاہتے ہیں؟', 
+    confirmText = 'تصدیق کریں', 
+    cancelText = 'کینسل',
+    type = 'info'
+} = Astro.props;
+---
+
+<div 
+    id={id} 
+    class="modal-wrapper fixed inset-0 z-200 items-center justify-center p-6 hidden opacity-0 transition-all duration-500"
+>
+    {/* Backdrop */}
+    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity"></div>
+
+    {/* Content */}
+    <div class="relative w-full max-w-lg glass-premium p-10 rounded-[3rem] border border-white/40 shadow-premium scale-90 group transition-all duration-500 font-urdu text-right">
+        {/* Decorative Blob */}
+        <div class="absolute -top-32 -right-32 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex flex-col items-center text-center gap-6 relative z-10">
+            <div class={`w-24 h-24 rounded-4xl flex items-center justify-center shadow-lg transition-transform duration-700 animate-float ${
+                type === 'danger' ? 'bg-red-500 text-white shadow-red-500/20' :
+                type === 'success' ? 'bg-emerald-500 text-white shadow-emerald-500/20' :
+                'bg-blue-500 text-white shadow-blue-500/20'
+            }`}>
+                <Icon name={type === 'danger' ? 'trash' : type === 'success' ? 'check' : 'help-circle'} size={48} />
+            </div>
+
+            <div class="space-y-3">
+                <h3 class="text-3xl font-black text-slate-900">{title}</h3>
+                <p class="text-lg text-slate-400 font-bold opacity-80">{description}</p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center gap-4 w-full mt-6">
+                 <button 
+                    id={`${id}-cancel`}
+                    class="w-full py-5 rounded-2xl bg-white border border-slate-100 text-slate-400 font-black hover:text-slate-600 transition-all hover:shadow-sm"
+                >
+                    {cancelText}
+                </button>
+                <button 
+                    id={`${id}-confirm`}
+                    class={`w-full py-5 rounded-2xl text-white font-black shadow-lg transition-all hover:-translate-y-1 active:scale-95 ${
+                        type === 'danger' ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20' :
+                        type === 'success' ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20' :
+                        'bg-blue-500 hover:bg-blue-600 shadow-blue-500/20'
+                    }`}
+                >
+                    {confirmText}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .modal-wrapper.show {
+        display: flex !important;
+        opacity: 1;
+    }
+    .modal-wrapper.show > div:last-child {
+        transform: scale(1);
+    }
+</style>
+
+<script define:vars={{ id }}>
+    const safeName = id.replace(/-/g, '_');
+    window[`showModal_${safeName}`] = (callback) => {
+        // ALWAYS fetch the live unmounted DOM nodes due to Astro swap!
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        
+        if (modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
+
+        const cancelBtn = modal.querySelector(`#${id}-cancel`);
+        const confirmBtn = modal.querySelector(`#${id}-confirm`);
+
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('show'), 10);
+        
+        const cleanup = () => {
+            modal.classList.remove('show');
+            setTimeout(() => modal.classList.add('hidden'), 500);
+        };
+
+        const onConfirm = () => {
+            callback(true);
+            cleanup();
+        };
+
+        const onCancel = () => {
+            callback(false);
+            cleanup();
+        };
+
+        if (confirmBtn) confirmBtn.addEventListener('click', onConfirm, { once: true });
+        if (cancelBtn) cancelBtn.addEventListener('click', onCancel, { once: true });
+    };
+</script>

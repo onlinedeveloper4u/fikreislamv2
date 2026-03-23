@@ -1,0 +1,29 @@
+/* src/styles/base.css */
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  direction: rtl;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-bg-main);
+  color: var(--color-text-main);
+  font-family: var(--font-urdu);
+  line-height: 2;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+.font-urdu {
+  font-family: var(--font-urdu);
+}
+
+.ltr { direction: ltr; }
+.rtl { direction: rtl; }

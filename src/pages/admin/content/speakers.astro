@@ -1,0 +1,16 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import TaxonomyManager from '../../../modules/admin/components/TaxonomyManager.astro';
+
+const search = Astro.url.searchParams.get('search') || '';
+---
+
+<AdminLayout title="مقررین کا انتظام — فکر اسلام" active="speakers">
+  <TaxonomyManager 
+    table="speakers" 
+    title="مقررین" 
+    icon="users" 
+    placeholder="مقرر کا نام درج کریں..."
+    search={search}
+  />
+</AdminLayout>

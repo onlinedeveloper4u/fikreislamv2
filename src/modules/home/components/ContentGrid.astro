@@ -1,0 +1,67 @@
+---
+// src/components/ui/ContentGrid.astro
+import AudioCard from './AudioCard.astro';
+import Icon from '../../../components/shared/Icon.astro';
+import type { ContentItem } from '../../../lib/types';
+
+interface Props {
+  items: ContentItem[];
+  title: string;
+  description?: string;
+}
+
+const { items, title, description } = Astro.props;
+---
+
+<section class="py-12">
+    <div class="mb-14 animate-fade-in space-y-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-1 bg-emerald-500 rounded-full"></div>
+            <span class="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600 opacity-80">Explore Library</span>
+        </div>
+        <h2 class="text-4xl sm:text-5xl font-black text-slate-900 leading-tight">{title}</h2>
+        {description && <p class="text-xl text-slate-400 font-bold max-w-3xl leading-relaxed">{description}</p>}
+    </div>
+
+    {/* This container will be toggled by the SearchSection logic */}
+    <div id="audio-grid-container" class="view-grid">
+        {items.length > 0 ? (
+            <>
+                <div class="grid-layout grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    {items.map(item => (
+                        <AudioCard item={item} view="grid" />
+                    ))}
+                </div>
+                <div class="list-layout hidden flex-col gap-6">
+                    {items.map(item => (
+                        <AudioCard item={item} view="list" />
+                    ))}
+                </div>
+            </>
+        ) : (
+            <div class="glass-card p-24 text-center rounded-[3rem] border border-dashed border-slate-200">
+                <div class="opacity-20 flex flex-col items-center gap-4">
+                    <Icon name="music" size={64} />
+                    <p class="text-xl font-urdu font-bold">کوئی مواد دستیاب نہیں ہے۔</p>
+                </div>
+            </div>
+        )}
+    </div>
+</section>
+
+<style is:global>
+    /* View Switching Logic */
+    .view-grid .grid-layout {
+        display: grid !important;
+    }
+    .view-grid .list-layout {
+        display: none !important;
+    }
+
+    .view-list .grid-layout {
+        display: none !important;
+    }
+    .view-list .list-layout {
+        display: flex !important;
+    }
+</style>

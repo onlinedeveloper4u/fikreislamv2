@@ -1,7 +1,7 @@
 import { defineConfig } from 'astro/config';
-import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
 import cloudflare from '@astrojs/cloudflare';
+import auth from 'auth-astro';
 
 // https://astro.build/config
 export default defineConfig({
@@ -11,7 +11,7 @@ export default defineConfig({
             enabled: true,
         },
     }),
-    integrations: [react()],
+    integrations: [auth()],
     vite: {
         plugins: [tailwindcss()],
     },

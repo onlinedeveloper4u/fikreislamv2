@@ -1,0 +1,116 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import Icon from '../../components/shared/Icon.astro';
+
+// This is a placeholder for the uploading status page
+---
+
+<AdminLayout title="اپلوڈنگ کی صورتحال — فکر اسلام" active="uploading">
+  <div class="space-y-12 font-urdu pb-20">
+    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-10">
+      <div class="relative">
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl"></div>
+        <h1 class="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">اپلوڈنگ کی صورتحال</h1>
+        <p class="text-slate-400 mt-4 text-xl font-bold max-w-xl opacity-80">زیرِ عمل اپ لوڈز اور ان کی تفصیلات یہاں دیکھی جا سکتی ہیں۔</p>
+      </div>
+    </div>
+
+    <div id="uploads-list" class="grid grid-cols-1 gap-6">
+        <!-- Placeholder/Empty State -->
+        <div id="empty-state" class="glass-premium p-12 rounded-[3.5rem] border border-white/40 shadow-premium flex flex-col items-center justify-center text-center space-y-6">
+            <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center">
+                <Icon name="upload-cloud" size={48} class="text-slate-200" />
+            </div>
+            <div>
+                <h3 class="text-2xl font-black text-slate-400">فی الحال کوئی مواد اپ لوڈ نہیں ہو رہا</h3>
+                <p class="text-slate-300 mt-2 font-bold">نئے مواد کے لیے "مواد" سیکشن میں جائیں۔</p>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <script is:inline>
+      const listContainer = document.getElementById('uploads-list');
+      const emptyState = document.getElementById('empty-state');
+
+      const renderUploads = (uploads) => {
+          if (!uploads || uploads.length === 0) {
+              if (emptyState) emptyState.classList.remove('hidden');
+              // Clear existing items but keep empty state
+              Array.from(listContainer.children).forEach(child => {
+                  if (child.id !== 'empty-state') child.remove();
+              });
+              return;
+          }
+
+          if (emptyState) emptyState.classList.add('hidden');
+          
+          // Clear and Re-render
+          Array.from(listContainer.children).forEach(child => {
+              if (child.id !== 'empty-state') child.remove();
+          });
+
+          uploads.forEach(upload => {
+              const card = document.createElement('div');
+              card.className = 'glass-premium p-8 rounded-[2.5rem] border border-white/40 shadow-premium flex flex-col md:flex-row md:items-center justify-between gap-6 hover:translate-y-[-4px] transition-all duration-300';
+              
+              const statusColors = {
+                  uploading: 'emerald',
+                  completed: 'blue',
+                  failed: 'red'
+              };
+              const color = statusColors[upload.status] || 'slate';
+              
+              const statusLabels = {
+                  uploading: 'جاری ہے...',
+                  completed: 'مکمل ہو گیا',
+                  failed: 'خرابی آگئی'
+              };
+
+              card.innerHTML = `
+                  <div class="flex items-center gap-6">
+                      <div class="w-16 h-16 rounded-2xl bg-${color}-50 flex items-center justify-center shrink-0">
+                          <div class="status-icon ${upload.status === 'uploading' ? 'animate-pulse' : ''}">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-${color}-500"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                          </div>
+                      </div>
+                      <div>
+                          <h4 class="text-xl font-black text-slate-900">${upload.title}</h4>
+                          <div class="flex items-center gap-3 mt-1">
+                              <span class="text-[10px] font-black uppercase tracking-widest text-${color}-600 bg-${color}-50 px-2 py-0.5 rounded">${statusLabels[upload.status]}</span>
+                              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">${new Date(upload.startTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                      </div>
+                  </div>
+                  
+                  <div class="flex-1 max-w-md w-full">
+                      <div class="flex items-center justify-between mb-2">
+                          <span class="text-xs font-black text-slate-400 uppercase tracking-widest">پروگریس</span>
+                          <span class="text-xs font-black text-slate-900">${upload.progress}%</span>
+                      </div>
+                      <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+                          <div class="h-full bg-${color}-500 transition-all duration-500" style="width: ${upload.progress}%"></div>
+                      </div>
+                      ${upload.error ? `<p class="text-[10px] text-red-500 mt-2 font-bold">${upload.error}</p>` : ''}
+                  </div>
+              `;
+              listContainer.appendChild(card);
+          });
+      };
+
+      // Initial Render
+      if (window.activeUploads) renderUploads(window.activeUploads);
+
+      // Listen for updates
+      window.addEventListener('uploads-updated', (e) => {
+          renderUploads(e.detail);
+      });
+      
+      // Auto-refresh progress bar animation if uploading
+      setInterval(() => {
+          if (window.activeUploads && window.activeUploads.some(u => u.status === 'uploading')) {
+              renderUploads(window.activeUploads);
+          }
+      }, 2000);
+  </script>
+</AdminLayout>

@@ -1,0 +1,16 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import TaxonomyManager from '../../../modules/admin/components/TaxonomyManager.astro';
+
+const search = Astro.url.searchParams.get('search') || '';
+---
+
+<AdminLayout title="آڈیو اقسام — فکر اسلام" active="audio-types">
+  <TaxonomyManager 
+    table="audio_types" 
+    title="آڈیو اقسام" 
+    icon="music" 
+    placeholder="آڈیو قسم کا نام درج کریں..."
+    search={search}
+  />
+</AdminLayout>

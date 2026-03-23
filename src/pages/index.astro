@@ -1,28 +1,31 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ContentSection from '../components/ContentSection';
-import { supabase } from '../lib/supabase';
-import { withSignedUrls } from '../lib/storage';
+import HeroSection from '../modules/home/components/HeroSection.astro';
+import SearchSection from '../modules/home/components/SearchSection.astro';
+import ContentGrid from '../modules/home/components/ContentGrid.astro';
+import { getDb } from '../lib/db';
 import type { ContentItem } from '../lib/types';
 
-// Server-side fetch — all approved audio content for the home page library
-const { data, error } = await supabase
-  .from('content')
-  .select('id, title, description, author, type, language, tags, file_url, cover_image_url, duration, file_size, published_at')
-  .eq('status', 'approved')
-  .eq('type', 'audio')
-  .order('published_at', { ascending: false });
+// Server-side fetch — all published audio content for the home page library
+const db = await getDb();
+const data = await db.collection('content')
+  .find({ status: 'published', type: 'audio' })
+  .sort({ published_at: -1 })
+  .toArray();
 
-let items: ContentItem[] = (data as ContentItem[]) || [];
-items = await withSignedUrls(items);
+// Map MongoDB _id to id for compatibility
+let items: ContentItem[] = data.map((doc: any) => ({
+  ...doc,
+  id: doc._id.toString(),
+})) as ContentItem[];
 ---
 
 <BaseLayout title="فکر اسلام — آڈیو لائبریری" description="مختلف علماء کے بصیرت افروز خطبات، سلسلے اور قرآنی تلاوت سنیں۔">
-  <div class="container-app">
-    <ContentSection
-      client:load
+  <HeroSection />
+  <SearchSection />
+  <div id="audio-library" class="container-app py-20">
+    <ContentGrid
       items={items}
-      contentType="audio"
       title="آڈیو لائبریری"
       description="مختلف علماء کے بصیرت افروز خطبات، سلسلے اور قرآنی تلاوت سنیں۔"
     />

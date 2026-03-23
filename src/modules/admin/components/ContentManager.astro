@@ -1,0 +1,309 @@
+---
+// src/modules/admin/components/ContentManager.astro
+import { getDb } from '../../../lib/db';
+import Icon from '../../../components/shared/Icon.astro';
+import Modal from '../../../components/shared/Modal.astro';
+import AudioUploadForm from './AudioUploadForm.astro';
+import type { ContentItem } from '../../../lib/types';
+
+const { search = '' } = Astro.props;
+
+// Fetch content server-side from MongoDB
+const db = await getDb();
+const filter: any = {};
+if (search) {
+    filter.title = { $regex: search, $options: 'i' };
+}
+
+const content = await db.collection('content')
+  .find(filter)
+  .sort({ created_at: -1 })
+  .toArray();
+
+// Map MongoDB _id to id for compatibility
+const items = content.map((doc: any) => ({
+  ...doc,
+  id: doc._id.toString(),
+})) as unknown as ContentItem[];
+---
+
+<div class="space-y-10 font-urdu pb-20">
+  {/* Filter & Action Bar */}
+  <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-8">
+    <div class="relative flex-1 max-w-2xl group">
+        <div class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors">
+            <Icon name="search" size={24} />
+        </div>
+        <form method="GET">
+            <input 
+                type="text" 
+                name="search"
+                value={search}
+                placeholder="عنوان یا مقرر سے تلاش کریں..."
+                class="w-full pr-14 pl-6 py-5 rounded-[2rem] bg-white border border-slate-100 focus:border-emerald-500 focus:bg-white transition-all shadow-premium outline-none font-black text-lg"
+            />
+        </form>
+    </div>
+
+    <div class="flex items-center gap-4">
+        <button id="add-content-btn" class="px-10 py-5 rounded-[2rem] bg-emerald-500 text-white font-black flex items-center gap-4 shadow-shadow-premium hover:bg-emerald-600 hover:-translate-y-1 transition-all">
+            <Icon name="upload" size={20} />
+            نیا مواد اپ لوڈ کریں
+        </button>
+    </div>
+  </div>
+
+  {/* Table View */}
+  <div class="glass-premium rounded-[3rem] border border-white/40 shadow-premium overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse">
+        <thead class="bg-slate-50/30 border-b border-slate-100">
+          <tr class="text-right">
+            <th class="px-10 py-6 text-xs font-black text-slate-400 uppercase tracking-widest">مواد</th>
+            <th class="px-10 py-6 text-xs font-black text-slate-400 uppercase tracking-widest">تفصیلات</th>
+            <th class="px-10 py-6 text-xs font-black text-slate-400 uppercase tracking-widest">تاریخ</th>
+
+            <th class="px-10 py-6 text-xs font-black text-slate-400 uppercase tracking-widest text-center">ایکشن</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {items.map((item) => (
+            <tr class="group hover:bg-white/40 transition-all duration-500">
+              <td class="px-10 py-8">
+                <div class="flex items-center gap-6">
+                  <div class="relative">
+                    <div class="w-20 h-20 rounded-[1.75rem] bg-white shadow-premium border border-white overflow-hidden shrink-0 group-hover:rotate-3 group-hover:scale-105 transition-all duration-500 p-1">
+                      {item.cover_image_url ? (
+                          <img src={item.cover_image_url} alt="" class="w-full h-full object-cover rounded-[1.25rem]" />
+                      ) : (
+                          <div class="w-full h-full bg-slate-50 rounded-[1.25rem] flex items-center justify-center">
+                              <Icon name="music" size={32} class="text-slate-200" />
+                          </div>
+                      )}
+                    </div>
+                    <div class="absolute -bottom-1 -left-1 w-6 h-6 rounded-full bg-emerald-500 border-4 border-white shadow-sm flex items-center justify-center">
+                        <Icon name="check" size={10} class="text-white" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 class="font-black text-slate-900 text-xl group-hover:text-emerald-600 transition-colors leading-tight">{item.title}</h4>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-[9px] font-black uppercase tracking-widest">{item.audio_type || 'General'}</span>
+                        <span class="text-[10px] text-slate-400 font-black opacity-50">#{item.id.toString().substring(0, 8)}</span>
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-10 py-8">
+                <div class="flex flex-col gap-2 text-right">
+                  <div class="flex items-center justify-end gap-3 font-black text-slate-700">
+                    <span class="text-lg">{item.speaker}</span>
+                    <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center">
+                        <Icon name="user" size={18} />
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-end gap-2 text-sm text-slate-400 font-bold">
+                    <span>{item.language}</span>
+                    <Icon name="globe" size={14} class="opacity-40" />
+                  </div>
+                </div>
+              </td>
+              <td class="px-10 py-8">
+                <div class="flex flex-col items-end gap-1">
+                   <div class="flex items-center gap-2 text-base text-slate-600 font-black">
+                      <span>{new Date(item.created_at).toLocaleDateString('ur-PK')}</span>
+                      <Icon name="calendar" size={16} class="text-slate-300" />
+                    </div>
+                    <span class="text-[10px] text-slate-400 font-black uppercase tracking-widest">{new Date(item.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+              </td>
+
+              <td class="px-10 py-8">
+                <div class="flex items-center justify-center gap-3">
+                  <button 
+                    class="edit-content-btn w-12 h-12 rounded-2xl bg-white border border-slate-100 text-slate-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-premium hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group/btn"
+                    data-id={item.id}
+                    data-item={JSON.stringify(item)}
+                    title="ترمیم کریں"
+                  >
+                    <Icon name="edit-2" size={20} class="group-hover/btn:-rotate-12 transition-transform duration-500" />
+                  </button>
+                  <button 
+                    class="w-12 h-12 rounded-2xl bg-white border border-slate-100 text-slate-400 hover:bg-red-500 hover:text-white hover:border-red-500 hover:shadow-premium hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group/btn-delete"
+                    data-id={item.id}
+                    title="حذف کریں"
+                  >
+                    <Icon name="trash" size={20} />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    {items.length === 0 && (
+        <div class="py-20 flex flex-col items-center justify-center text-center space-y-4">
+            <div class="w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center">
+                <Icon name="search" size={48} class="text-slate-200" />
+            </div>
+            <div>
+                <h3 class="text-2xl font-black text-slate-800">کوئی مواد نہیں ملا</h3>
+                <p class="text-slate-400 mt-2 font-bold">براہ کرم تلاش کا لفظ تبدیل کریں یا نیا مواد اپ لوڈ کریں۔</p>
+            </div>
+        </div>
+    )}
+  </div>
+  
+  <Modal 
+    id="content-delete-confirm" 
+    title="مواد حذف کریں" 
+    description="کیا آپ واقعی اس مواد کو مستقل طور پر حذف کرنا چاہتے ہیں؟"
+    confirmText="ہاں، حذف کریں"
+    cancelText="واپس جائیں"
+    type="danger"
+  />
+
+  {/* Content Add/Edit Modal */}
+  <div id="content-modal" class="fixed inset-0 z-9999 flex items-center justify-center px-4 py-8 md:py-10 pointer-events-none">
+      <div id="content-modal-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md opacity-0 transition-opacity duration-500 pointer-events-auto"></div>
+      <div id="content-modal-content" class="relative w-full max-w-3xl mx-auto glass-premium rounded-[3rem] border border-white/40 shadow-2xl opacity-0 scale-95 translate-y-8 transition-all duration-500 pointer-events-auto overflow-hidden flex flex-col max-h-[95vh]">
+          {/* Internal Scrollable Container */}
+          <div class="overflow-y-auto p-6 sm:p-10 no-scrollbar ltr-scrollbar rtl">
+            <AudioUploadForm />
+          </div>
+      </div>
+  </div>
+</div>
+
+<script>
+    function initContentActions() {
+        // Delete
+        document.querySelectorAll('.group\\/btn-delete').forEach((btn: any) => {
+            if (btn._initialized) return;
+            btn._initialized = true;
+            btn.addEventListener('click', async () => {
+                const tr = btn.closest('tr');
+                const title = tr?.querySelector('h4')?.textContent;
+                const itemId = btn.getAttribute('data-id');
+
+                // @ts-ignore
+                window.showModal_content_delete_confirm(async (confirmed) => {
+                    if (!confirmed) return;
+
+                    try {
+                        const response = await fetch('/api/admin/delete-content', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: itemId })
+                        });
+
+                        if (response.ok) {
+                            // @ts-ignore
+                            if (window.showToast) window.showToast(`"${title}" کامیابی سے حذف ہو گیا۔`, "success");
+                            tr?.remove();
+                        } else {
+                             // @ts-ignore
+                            if (window.toast) window.toast.show("مواد حذف کرنے میں خرابی۔", "error");
+                        }
+                    } catch (err) {
+                        // @ts-ignore
+                        if (window.toast) window.toast.show("سسٹم میں خرابی۔", "error");
+                    }
+                });
+            });
+        });
+
+        // Content Modal
+        const modal = document.getElementById('content-modal');
+        const overlay = document.getElementById('content-modal-overlay');
+        const content = document.getElementById('content-modal-content');
+        const addBtn = document.getElementById('add-content-btn');
+
+        function toggleModal(show: boolean) {
+            if (show) {
+                if (modal && modal.parentElement !== document.body) {
+                    document.body.appendChild(modal);
+                }
+                // @ts-ignore
+                if (window.toggleBodyScroll) window.toggleBodyScroll(true);
+                modal?.classList.remove('hidden');
+                setTimeout(() => {
+                    overlay?.classList.add('opacity-100');
+                    content?.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+                    content?.classList.remove('translate-y-8', 'scale-95');
+                }, 10);
+            } else {
+                overlay?.classList.remove('opacity-100');
+                content?.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+                content?.classList.add('translate-y-8', 'scale-95');
+                setTimeout(() => {
+                    modal?.classList.add('hidden');
+                    // @ts-ignore
+                    if (window.toggleBodyScroll) window.toggleBodyScroll(false);
+                }, 500);
+            }
+        }
+
+        // @ts-ignore
+        if (addBtn && !addBtn._initialized) {
+            // @ts-ignore
+            addBtn._initialized = true;
+            addBtn.addEventListener('click', () => {
+                // @ts-ignore
+                if (window.resetContentForm) window.resetContentForm();
+                toggleModal(true);
+            });
+        }
+
+        document.querySelectorAll('.edit-content-btn').forEach((btn: any) => {
+            if (btn._initialized) return;
+            btn._initialized = true;
+            btn.addEventListener('click', () => {
+                const itemData = JSON.parse(btn.getAttribute('data-item') || '{}');
+                // @ts-ignore
+                if (window.populateContentForm) window.populateContentForm(itemData);
+                toggleModal(true);
+            });
+        });
+
+        document.querySelectorAll('.close-modal-btn').forEach((btn: any) => {
+            if (btn._initialized) return;
+            btn._initialized = true;
+            btn.addEventListener('click', () => toggleModal(false));
+            overlay?.addEventListener('click', () => toggleModal(false));
+        });
+
+        // Handle success
+        // @ts-ignore
+        if (!document._contentSavedListenerAttached) {
+            // @ts-ignore
+            document._contentSavedListenerAttached = true;
+            document.addEventListener('content-saved', () => {
+                toggleModal(false);
+                setTimeout(() => window.location.reload(), 500);
+            });
+        }
+
+        // Handle URL params for deep linking
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('action') === 'add') {
+            // @ts-ignore
+            if (window.resetContentForm) window.resetContentForm();
+            toggleModal(true);
+        } else if (params.get('edit')) {
+            const editId = params.get('edit');
+            const editBtn = document.querySelector(`.edit-content-btn[data-id="${editId}"]`);
+            if (editBtn) {
+                const itemData = JSON.parse(editBtn.getAttribute('data-item') || '{}');
+                // @ts-ignore
+                if (window.populateContentForm) window.populateContentForm(itemData);
+                toggleModal(true);
+            }
+        }
+    }
+
+    initContentActions();
+    document.addEventListener('astro:page-load', initContentActions);
+</script>
