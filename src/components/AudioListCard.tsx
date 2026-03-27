@@ -95,7 +95,7 @@ export default function AudioListCard({ item, index }: AudioListCardProps) {
                 <div className="w-28 h-full relative overflow-hidden bg-slate-50 group/img">
                     {item.cover_image_url ? (
                         <img
-                            src={item.cover_image_url}
+                            src={resolveMediaUrl(item.cover_image_url)}
                             alt={item.title}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110"
                         />

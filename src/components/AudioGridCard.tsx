@@ -98,7 +98,7 @@ export default function AudioGridCard({ item, index }: AudioGridCardProps) {
             <div className="aspect-square relative overflow-hidden bg-slate-50">
                 {item.cover_image_url ? (
                     <img
-                        src={item.cover_image_url}
+                        src={resolveMediaUrl(item.cover_image_url)}
                         alt={item.title}
                         className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                         loading="lazy"
